@@ -12,6 +12,32 @@
 
 <body>
     <div id="root">
+        <fieldset id="renderSettings">
+
+            <legend>Render settings</legend>
+
+            <div>
+            <label for="canvasWidth">Canvas Width:</label>
+            <input type="number" id="canvasWidth" name="width"
+                   placeholder="720" min="240" step="5" value="720" />
+            </div>
+
+            <div>
+            <label for="canvasWidth">Canvas Height:</label>
+            <input type="number" id="canvasHeight" name="height"
+                   placeholder="405" min="240" step="5" value="405"/>
+            </div>
+            <label for="raysPerPixel">Rays per pixel:</label>
+
+            <div>
+            <input type="range" id="raysPerPixel" name="raysPerPixel"
+                   min="16" max="128" value="16" step="8" />
+            <span id="samplesLabel">16</span>
+            </div>
+            <div>
+                <button id="renderButton">Render</button>
+            </div>
+        </fieldset>
         <canvas id="canvas" width="720" height="405">
         </canvas>
     </div>

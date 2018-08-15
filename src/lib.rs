@@ -1,6 +1,8 @@
 #![feature(use_extern_macros)]
 #![allow(dead_code)]
 
+#[macro_use]
+extern crate cascade;
 extern crate cgmath;
 extern crate wasm_bindgen;
 
@@ -72,18 +74,46 @@ impl Ray {
     }
 }
 
+fn reflect(v: &Vector3<f32>, n: &Vector3<f32>) -> Vector3<f32> {
+    v - n * 2.0 * v.dot(*n)
+}
+
+#[derive(Clone, Copy)]
+enum Material {
+    Lambertian { r: f32, g: f32, b: f32 },
+    Metalic { r: f32, g: f32, b: f32 },
+}
+
+//enum Material {
+//    Lambertian{albedo: Vector3<f32>},
+//    Metal{albedo: Vector3<f32>}
+//}
+//
+//fn scatter(material: Material, ray: &Ray, scattered: &mut Ray, rec: &ShadeRecord) -> Option<Vector3<f32>> {
+//    match material {
+//        Material::Lambertian{albedo} => {
+//            let target = rec.local_hit_point + rec.normal + random_vec_in_unit_sphere();
+//            *scattered = Ray::new(rec.local_hit_point, target - rec.local_hit_point);
+//            Some(albedo)
+//        },
+//        Material::Metal{albedo} => None
+//    }
+//}
+
 #[derive(Clone, Copy)]
 pub struct ShadeRecord {
     normal: Vector3<f32>,
     local_hit_point: Point3<f32>,
+    material: Material,
     t: f32,
 }
 
 impl ShadeRecord {
-    fn new(normal: Vector3<f32>, local_hit_point: Point3<f32>, t: f32) -> Self {
+    fn new(normal: Vector3<f32>, local_hit_point: Point3<f32>, material: Material, t: f32) -> Self {
         ShadeRecord {
             normal,
             local_hit_point,
+            material,
             t,
         }
     }
@@ -96,11 +126,16 @@ trait GeometricObject {
 struct Sphere {
     center: Point3<f32>,
     radius: f32,
+    material: Material,
 }
 
 impl Sphere {
-    fn new(center: Point3<f32>, radius: f32) -> Self {
-        Sphere { center, radius }
+    fn new(center: Point3<f32>, radius: f32, material: Material) -> Self {
+        Sphere {
+            center,
+            radius,
+            material,
+        }
     }
 }
 
@@ -134,6 +169,7 @@ impl GeometricObject for Sphere {
                 t,
                 local_hit_point,
                 normal: (local_hit_point - self.center) / self.radius,
+                material: self.material,
             })
         } else {
             None
@@ -174,59 +210,20 @@ impl World {
     }
 }
 
-//enum Material {
-//    Lambertian{albedo: Vector3<f32>},
-//    Metal{albedo: Vector3<f32>}
-//}
-//
-//fn scatter(material: Material, ray: &Ray, scattered: &mut Ray, rec: &ShadeRecord) -> Option<Vector3<f32>> {
-//    match material {
-//        Material::Lambertian{albedo} => {
-//            let target = rec.local_hit_point + rec.normal + random_vec_in_unit_sphere();
-//            *scattered = Ray::new(rec.local_hit_point, target - rec.local_hit_point);
-//            Some(albedo)
-//        },
-//        Material::Metal{albedo} => None
-//    }
-//}
-
-trait Material {
-    fn scatter(ray: &Ray, scattered: &Ray, rec: &ShadeRecord) -> Option<Ray>;
-}
-
-enum Abc {
-    Xx{a: f32},
-    Yy{ab: f32},
-}
-
-impl Abc {
-    fn scatter(&self) {
-
-    }
-}
-
-struct Lambertian {
-    albedo: Vector3<f32>
-}
-
-impl Lambertian {
-    fn new(r: f32, g: f32, b: f32) -> Self {
-        Lambertian {
-            albedo: vec3(r, g, b)
-        }
-    }
-}
-
-fn reflect(v: &Vector3<f32>, n: &Vector3<f32>) -> Vector3<f32> {
-    v - n * 2.0 * v.dot(*n)
-}
-
-
-fn color(ray: &Ray, world: &World) -> Vector3<f32> {
+fn color(ray: &Ray, world: &World, depth: usize) -> Vector3<f32> {
     if let Some(rec) = world.trace(ray) {
-        let target = rec.local_hit_point + rec.normal + random_vec_in_unit_sphere();
-        let bounced_ray = Ray::new(rec.local_hit_point, target - rec.local_hit_point);
-        color(&bounced_ray, world) * 0.5
+        if depth < 50 {
+            let target = rec.local_hit_point + rec.normal + random_vec_in_unit_sphere();
+            let bounced_ray = Ray::new(rec.local_hit_point, target - rec.local_hit_point);
+            let c = match rec.material {
+                Material::Lambertian { r, g, b } => vec3(r, g, b),
+                Material::Metalic { r, g, b } => vec3(r, g, b),
+            };
+            let (r, g, b) = color(&bounced_ray, world, depth + 1).into();
+            vec3(c.x * r, c.y * g, c.z * b)
+        } else {
+            vec3(0.0, 0.0, 0.0)
+        }
     } else {
         let unit_direction = ray.direction.normalize();
         let t = (unit_direction.y + 1.0) * 0.5;
@@ -260,22 +257,55 @@ impl Camera {
 }
 
 #[wasm_bindgen]
-pub fn make_image(canvas_width: u16, canvas_height: u16) -> Vec<u32> {
+pub fn make_image(canvas_width: u16, canvas_height: u16, num_samples: u8) -> Vec<u32> {
     let size = usize::from(canvas_width) * usize::from(canvas_height);
 
-    let num_samples: u8 = 128;
-    let shize = f32::from(num_samples);
+    let samples_divider = f32::from(num_samples);
 
     let mut image = Vec::with_capacity(size);
-    let mut world = World::new();
-
-
-    world.add_object(Box::new(Sphere::new(Point3::new(0.0, 0.01, -1.0), 0.5)));
-    world.add_object(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
+    let world = cascade! {
+        World::new();
+        ..add_object(Box::new(Sphere::new(
+        Point3::new(0.0, 0.01, -1.0),
+        0.5,
+        Material::Lambertian {
+            r: 0.8,
+            g: 0.3,
+            b: 0.3,
+        },
+    )));
+    ..add_object(Box::new(Sphere::new(
+        Point3::new(0.0, -100.5, -1.0),
+        100.0,
+        Material::Lambertian {
+            r: 0.8,
+            g: 0.8,
+            b: 0.0,
+        },
+    )));
+    ..add_object(Box::new(Sphere::new(
+        Point3::new(1.0, 0.0, -1.0),
+        0.5,
+        Material::Lambertian {
+            r: 0.25,
+            g: 0.35,
+            b: 0.75,
+        },
+    )));
+    ..add_object(Box::new(Sphere::new(
+        Point3::new(-1.0, 0.0, -1.0),
+        0.5,
+        Material::Lambertian {
+            r: 0.8,
+            g: 0.8,
+            b: 0.8,
+        },
+    )));
+    };
 
     let camera = Camera::new(f32::from(canvas_height) / f32::from(canvas_width));
 
-   let mut col =vec3(0.0, 0.0, 0.0);
+    let mut col = vec3(0.0, 0.0, 0.0);
 
     for i in 0..canvas_height {
         for j in 0..canvas_width {
@@ -287,25 +317,21 @@ pub fn make_image(canvas_width: u16, canvas_height: u16) -> Vec<u32> {
                 let dy = (f32::from(i) + 1.0 - (2.0 * random())) / f32::from(canvas_height);
 
                 let direction = camera.get_ray(dx, dy);
-                col += color(&direction, &world);
+                col += color(&direction, &world, 0);
             }
-            col /= shize;
+            col /= samples_divider;
 
-//            if c.x > 1.0 {
-//                log(&format!("{}", c.x));
-//            }
-
-            // if cfg!(target_endian = "little") {
-            //            let ray = Ray::new(origin, direction);
             let (r, g, b) = col.into();
 
-            let z = [(r.sqrt() * 255.0) as u8, (g.sqrt() * 255.0) as u8, (b.sqrt() * 255.0) as u8, 255];
+            let z = [
+                (r.sqrt() * 255.0) as u8,
+                (g.sqrt() * 255.0) as u8,
+                (b.sqrt() * 255.0) as u8,
+                255,
+            ];
 
             let pixel = unsafe { mem::transmute::<[u8; 4], u32>(z) };
             image.push(pixel);
-            // } else {
-            // image.push(pixel.swap_bytes());
-            // }
         }
     }
     image
@@ -328,10 +354,10 @@ pub fn greet(_name: &str) {
     // alert(&z);
     // alert(&format!("Hello, {} {} {}!", name, s, &r));
 
-//     let rs = format!("{:?}", make_random_array(4));
-//     log(&rs);
-//
-//    let v = random_vec_in_unit_sphere();
-//    let rs = format!("{:?}, {:?}", v, Vector3::<f32>::dot(v, v));
-//    log(&rs);
+    //     let rs = format!("{:?}", make_random_array(4));
+    //     log(&rs);
+    //
+    //    let v = random_vec_in_unit_sphere();
+    //    let rs = format!("{:?}, {:?}", v, Vector3::<f32>::dot(v, v));
+    //    log(&rs);
 }

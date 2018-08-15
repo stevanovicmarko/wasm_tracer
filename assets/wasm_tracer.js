@@ -48,11 +48,12 @@ function globalArgumentPtr() {
 /**
 * @param {number} arg0
 * @param {number} arg1
+* @param {number} arg2
 * @returns {Uint32Array}
 */
-export function make_image(arg0, arg1) {
+export function make_image(arg0, arg1, arg2) {
     const retptr = globalArgumentPtr();
-    wasm.make_image(retptr, arg0, arg1);
+    wasm.make_image(retptr, arg0, arg1, arg2);
     const mem = getUint32Memory();
     const rustptr = mem[retptr / 4];
     const rustlen = mem[retptr / 4 + 1];

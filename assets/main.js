@@ -4,19 +4,23 @@ wasmPromise
     .then(({ make_image, greet }) => {
     greet('ABC');
     const widthInput = document.getElementById("canvasWidth");
-    const heighInput = document.getElementById("canvasHeight");
+    const heightInput = document.getElementById("canvasHeight");
     const raysPerPixel = document.getElementById("raysPerPixel");
     const samplesLabel = document.getElementById("samplesLabel");
     const renderButton = document.getElementById("renderButton");
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
+    raysPerPixel.value = "16";
+    widthInput.value = "800";
+    heightInput.value = "500";
+    samplesLabel.innerHTML = raysPerPixel.value;
     raysPerPixel.addEventListener("change", event => {
         samplesLabel.innerHTML = event.target.value;
     });
     widthInput.addEventListener("change", event => {
         canvas.width = parseInt(event.target.value, 10);
     });
-    heighInput.addEventListener("change", event => {
+    heightInput.addEventListener("change", event => {
         canvas.height = parseInt(event.target.value, 10);
     });
     let timeoutHandler = null;
@@ -25,6 +29,8 @@ wasmPromise
         const height = canvas.height;
         const numberOfSamples = parseInt(samplesLabel.innerText, 10);
         renderButton.disabled = true;
+        widthInput.disabled = true;
+        heightInput.disabled = true;
         renderButton.innerText = "Rendering...";
         if (!timeoutHandler) {
             timeoutHandler = setTimeout(() => {
@@ -34,6 +40,8 @@ wasmPromise
                     ctx.putImageData(imageData, 0, 0);
                     renderButton.innerText = "Render";
                     renderButton.disabled = false;
+                    widthInput.disabled = false;
+                    heightInput.disabled = false;
                     timeoutHandler = null;
                 }
             }, 100);

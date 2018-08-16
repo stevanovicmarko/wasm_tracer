@@ -4,12 +4,18 @@ wasmPromise
     .then(({make_image, greet}) => {
         greet('ABC');
         const widthInput = document.getElementById("canvasWidth") as HTMLInputElement;
-        const heighInput = document.getElementById("canvasHeight") as HTMLInputElement;
+        const heightInput = document.getElementById("canvasHeight") as HTMLInputElement;
         const raysPerPixel = document.getElementById("raysPerPixel") as HTMLInputElement;
         const samplesLabel = document.getElementById("samplesLabel") as HTMLSpanElement;
         const renderButton = document.getElementById("renderButton") as HTMLButtonElement;
         const canvas = document.getElementById('canvas') as HTMLCanvasElement;
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+
+        raysPerPixel.value = "16";
+        widthInput.value = "800";
+        heightInput.value = "500";
+
+        samplesLabel.innerHTML = raysPerPixel.value;
 
         raysPerPixel.addEventListener("change", event => {
             samplesLabel.innerHTML = (event.target as HTMLInputElement).value;
@@ -19,11 +25,11 @@ wasmPromise
             canvas.width = parseInt((event.target as HTMLInputElement).value, 10);
         });
 
-        heighInput.addEventListener("change", event => {
+        heightInput.addEventListener("change", event => {
             canvas.height = parseInt((event.target as HTMLInputElement).value, 10);
         });
 
-        let timeoutHandler = null as null | number;
+        let timeoutHandler = null as (null | number);
 
         renderButton.addEventListener("click", event => {
             const width = canvas.width;
@@ -32,6 +38,9 @@ wasmPromise
 
 
             renderButton.disabled = true;
+            widthInput.disabled = true;
+            heightInput.disabled = true;
+
             renderButton.innerText = "Rendering...";
 
             if (!timeoutHandler) {
@@ -46,6 +55,8 @@ wasmPromise
                         ctx.putImageData(imageData, 0, 0);
                         renderButton.innerText = "Render"
                         renderButton.disabled = false;
+                        widthInput.disabled = false;
+                        heightInput.disabled = false;
                         timeoutHandler = null;
                     }
                 }, 100);

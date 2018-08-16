@@ -115,3 +115,5 @@ export function __wbindgen_throw(ptr, len) {
     throw new Error(getStringFromWasm(ptr, len));
 }
 
+export function __wbindgen_Math_tan(x) { return Math.tan(x); }
+

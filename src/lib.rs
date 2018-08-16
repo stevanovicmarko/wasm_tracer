@@ -3,6 +3,7 @@
 
 #[macro_use]
 extern crate cascade;
+
 extern crate cgmath;
 extern crate wasm_bindgen;
 
@@ -11,12 +12,18 @@ use cgmath::{vec3, Point3, Vector3};
 use std::{f32, mem, u16, usize};
 use wasm_bindgen::prelude::*;
 
+mod ray;
+use ray::Ray;
+
+mod camera;
+use camera::Camera;
+
 #[wasm_bindgen]
 extern "C" {
     fn alert(s: &str);
 
     #[wasm_bindgen(js_namespace = Math, js_name = random)]
-    fn random() -> f32;
+    pub fn random() -> f32;
 
     #[wasm_bindgen(js_namespace = console, js_name = log)]
     fn log(s: &str);
@@ -51,54 +58,23 @@ fn random_vec_in_unit_sphere() -> Vector3<f32> {
 
     random() * vec3(x, y, z)
 }
-#[derive(Clone, Copy)]
-pub struct Ray {
-    origin: Point3<f32>,
-    direction: Vector3<f32>,
-}
-
-impl Ray {
-    fn new(origin: Point3<f32>, direction: Vector3<f32>) -> Self {
-        Ray { origin, direction }
-    }
-
-    fn origin(&mut self, origin: Point3<f32>) {
-        self.origin = origin;
-    }
-    fn direction(&mut self, direction: Vector3<f32>) {
-        self.direction = direction;
-    }
-
-    fn point_at_parameter(&self, t: f32) -> Point3<f32> {
-        self.origin + (self.direction * t)
-    }
-}
 
 fn reflect(v: &Vector3<f32>, n: &Vector3<f32>) -> Vector3<f32> {
     v - n * 2.0 * v.dot(*n)
+}
+
+fn schlick(cosine: f32, ref_idx: f32) -> f32 {
+    let mut r0 = (1.0 - ref_idx) / (1.0 + ref_idx);
+    r0 = r0 * r0;
+    r0 + (1.0 - r0) * ((1.0 - cosine).powf(5.0))
 }
 
 #[derive(Clone, Copy)]
 enum Material {
     Lambertian { r: f32, g: f32, b: f32 },
     Metalic { r: f32, g: f32, b: f32 },
+    Dielectric { ri: f32 },
 }
-
-//enum Material {
-//    Lambertian{albedo: Vector3<f32>},
-//    Metal{albedo: Vector3<f32>}
-//}
-//
-//fn scatter(material: Material, ray: &Ray, scattered: &mut Ray, rec: &ShadeRecord) -> Option<Vector3<f32>> {
-//    match material {
-//        Material::Lambertian{albedo} => {
-//            let target = rec.local_hit_point + rec.normal + random_vec_in_unit_sphere();
-//            *scattered = Ray::new(rec.local_hit_point, target - rec.local_hit_point);
-//            Some(albedo)
-//        },
-//        Material::Metal{albedo} => None
-//    }
-//}
 
 #[derive(Clone, Copy)]
 pub struct ShadeRecord {
@@ -211,49 +187,47 @@ impl World {
 }
 
 fn color(ray: &Ray, world: &World, depth: usize) -> Vector3<f32> {
-    if let Some(rec) = world.trace(ray) {
-        if depth < 50 {
-            let target = rec.local_hit_point + rec.normal + random_vec_in_unit_sphere();
-            let bounced_ray = Ray::new(rec.local_hit_point, target - rec.local_hit_point);
-            let c = match rec.material {
-                Material::Lambertian { r, g, b } => vec3(r, g, b),
-                Material::Metalic { r, g, b } => vec3(r, g, b),
+    let rec = world.trace(ray);
+
+    let final_color: Vector3<f32> = match (rec, depth < 50) {
+        (Some(ref rec), true) => {
+            let c: Vector3<f32> = match rec.material {
+                Material::Lambertian { r, g, b } => {
+                    let target = rec.local_hit_point + rec.normal + random_vec_in_unit_sphere();
+                    let bounced_ray = Ray::new(rec.local_hit_point, target - rec.local_hit_point);
+                    let v = color(&bounced_ray, world, depth + 1);
+                    vec3(v.x * r, v.y * g, v.z * b)
+                }
+                Material::Metalic { r, g, b } => {
+                    let reflected = reflect(&ray.direction.normalize(), &rec.normal);
+                    let scattered = Ray::new(
+                        rec.local_hit_point,
+                        reflected + 0.5 * random_vec_in_unit_sphere(),
+                    );
+
+                    let v = if scattered.direction.dot(rec.normal) > 0.0 {
+                        let u = color(&scattered, world, depth + 1);
+                        vec3(u.x * r, u.y * g, u.z * b)
+                    } else {
+                        color(&scattered, world, depth + 1)
+                    };
+                    v
+                }
+                Material::Dielectric { ri } => {
+                    // TODO: Implement Dielectric
+                    vec3(ri, ri, ri)
+                }
             };
-            let (r, g, b) = color(&bounced_ray, world, depth + 1).into();
-            vec3(c.x * r, c.y * g, c.z * b)
-        } else {
-            vec3(0.0, 0.0, 0.0)
+            c
         }
-    } else {
-        let unit_direction = ray.direction.normalize();
-        let t = (unit_direction.y + 1.0) * 0.5;
-        vec3(1.0, 1.0, 1.0).lerp(vec3(0.5, 0.7, 1.0), t)
-    }
-}
-
-struct Camera {
-    origin: Point3<f32>,
-    horizontal: Vector3<f32>,
-    vertical: Vector3<f32>,
-    top_left_corner: Point3<f32>,
-}
-
-impl Camera {
-    fn new(aspect_ratio: f32) -> Self {
-        Camera {
-            origin: Point3::new(0.0, 0.0, 0.0),
-            top_left_corner: Point3::new(-2.0, 1.0, -1.0),
-            horizontal: Vector3::new(4.0, 0.0, 0.0),
-            vertical: Vector3::new(0.0, -4.0 * aspect_ratio, 0.0),
+        (Some(_), false) => vec3(0.0, 0.0, 0.0),
+        (None, _) => {
+            let unit_direction = ray.direction.normalize();
+            let t = (unit_direction.y + 1.0) * 0.5;
+            vec3(1.0, 1.0, 1.0).lerp(vec3(0.5, 0.7, 1.0), t)
         }
-    }
-
-    fn get_ray(&self, u: f32, v: f32) -> Ray {
-        Ray::new(
-            self.origin,
-            (self.top_left_corner + (self.horizontal * u + self.vertical * v)) - self.origin,
-        )
-    }
+    };
+    final_color
 }
 
 #[wasm_bindgen]
@@ -266,71 +240,94 @@ pub fn make_image(canvas_width: u16, canvas_height: u16, num_samples: u8) -> Vec
     let world = cascade! {
         World::new();
         ..add_object(Box::new(Sphere::new(
-        Point3::new(0.0, 0.01, -1.0),
-        0.5,
+        Point3::new(0.0, -1000.5, -1.0),
+        1000.0,
         Material::Lambertian {
-            r: 0.8,
-            g: 0.3,
+            r: 0.2,
+            g: 0.8,
             b: 0.3,
         },
-    )));
-    ..add_object(Box::new(Sphere::new(
-        Point3::new(0.0, -100.5, -1.0),
-        100.0,
+        )));
+        ..add_object(Box::new(Sphere::new(
+        Point3::new(0.0, 0.1, -1.0),
+        0.6,
         Material::Lambertian {
-            r: 0.8,
-            g: 0.8,
-            b: 0.0,
+            r: 0.99,
+            g: 0.1,
+            b: 0.01,
         },
     )));
     ..add_object(Box::new(Sphere::new(
-        Point3::new(1.0, 0.0, -1.0),
+        Point3::new(1.1, 0.0, -1.0),
         0.5,
         Material::Lambertian {
             r: 0.25,
-            g: 0.35,
-            b: 0.75,
+            g: 0.45,
+            b: 0.8,
         },
     )));
     ..add_object(Box::new(Sphere::new(
-        Point3::new(-1.0, 0.0, -1.0),
-        0.5,
-        Material::Lambertian {
+        Point3::new(-0.95, 0.5, -1.0),
+        0.45,
+        Material::Metalic {
             r: 0.8,
             g: 0.8,
             b: 0.8,
         },
     )));
+    ..add_object(Box::new(Sphere::new(
+        Point3::new(-1.2, -0.2, -1.0),
+        0.3,
+        Material::Lambertian {
+            r: 0.9,
+            g: 0.9,
+            b: 0.2,
+        },
+    )));
     };
 
-    let camera = Camera::new(f32::from(canvas_height) / f32::from(canvas_width));
+    let look_from = Point3::new(0.0, 0.9, 5.0);
+    let look_at = Point3::new(0.0, 0.0, -1.0);
+    let v_up = vec3(0.0, 1.0, 0.0);
+    let dist_to_focus = (look_from - look_at).magnitude();
+    let aperture = 0.4;
 
-    let mut col = vec3(0.0, 0.0, 0.0);
+    let camera = Camera::new(
+        look_from,
+        look_at,
+        v_up,
+        20.0,
+        f32::from(canvas_width) / f32::from(canvas_height),
+        aperture,
+        dist_to_focus,
+    );
+
+    let mut pixel_color = vec3(0.0, 0.0, 0.0);
 
     for i in 0..canvas_height {
         for j in 0..canvas_width {
-            col.x = 0.0;
-            col.y = 0.0;
-            col.z = 0.0;
+            pixel_color.x = 0.0;
+            pixel_color.y = 0.0;
+            pixel_color.z = 0.0;
             for _s in 0..num_samples {
                 let dx = (f32::from(j) + 1.0 - (2.0 * random())) / f32::from(canvas_width);
                 let dy = (f32::from(i) + 1.0 - (2.0 * random())) / f32::from(canvas_height);
 
                 let direction = camera.get_ray(dx, dy);
-                col += color(&direction, &world, 0);
+                pixel_color += color(&direction, &world, 0);
             }
-            col /= samples_divider;
+            pixel_color /= samples_divider;
 
-            let (r, g, b) = col.into();
+            let (r, g, b) = pixel_color.into();
 
-            let z = [
-                (r.sqrt() * 255.0) as u8,
-                (g.sqrt() * 255.0) as u8,
-                (b.sqrt() * 255.0) as u8,
-                255,
-            ];
-
-            let pixel = unsafe { mem::transmute::<[u8; 4], u32>(z) };
+            let pixel = unsafe {
+                mem::transmute::<[u8; 4], u32>([
+                    (r.sqrt() * 255.99) as u8,
+                    (g.sqrt() * 255.99) as u8,
+                    (b.sqrt() * 255.99) as u8,
+                    255,
+                ])
+            };
             image.push(pixel);
         }
     }

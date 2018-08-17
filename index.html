@@ -28,7 +28,6 @@
                    placeholder="500" min="240" step="5" value="500"/>
             </div>
             <label for="raysPerPixel">Rays per pixel:</label>
-
             <div>
             <input type="range" id="raysPerPixel" name="raysPerPixel"
                    min="8" max="192" value="16" step="8" />
@@ -36,6 +35,9 @@
             </div>
             <div>
                 <button id="renderButton">Render</button>
+            </div>
+            <div>
+                <span id="renderTime"></span>
             </div>
         </fieldset>
         <canvas id="canvas" width="720" height="405">

@@ -7,6 +7,31 @@ export function __wbg_random_366170509e85d0ad() {
     return __wbg_random_366170509e85d0ad_target();
 }
 
+const __wbg_log_c2c9fba8d792162f_target = console.log;
+
+const TextDecoder = typeof self === 'object' && self.TextDecoder
+    ? self.TextDecoder
+    : require('util').TextDecoder;
+
+let cachedDecoder = new TextDecoder('utf-8');
+
+let cachegetUint8Memory = null;
+function getUint8Memory() {
+    if (cachegetUint8Memory === null || cachegetUint8Memory.buffer !== wasm.memory.buffer) {
+        cachegetUint8Memory = new Uint8Array(wasm.memory.buffer);
+    }
+    return cachegetUint8Memory;
+}
+
+function getStringFromWasm(ptr, len) {
+    return cachedDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
+}
+
+export function __wbg_log_c2c9fba8d792162f(arg0, arg1) {
+    let varg0 = getStringFromWasm(arg0, arg1);
+    __wbg_log_c2c9fba8d792162f_target(varg0);
+}
+
 const slab = [{ obj: undefined }, { obj: null }, { obj: true }, { obj: false }];
 
 let slab_next = slab.length;
@@ -70,14 +95,6 @@ const TextEncoder = typeof self === 'object' && self.TextEncoder
 
 let cachedEncoder = new TextEncoder('utf-8');
 
-let cachegetUint8Memory = null;
-function getUint8Memory() {
-    if (cachegetUint8Memory === null || cachegetUint8Memory.buffer !== wasm.memory.buffer) {
-        cachegetUint8Memory = new Uint8Array(wasm.memory.buffer);
-    }
-    return cachegetUint8Memory;
-}
-
 function passStringToWasm(arg) {
     
     const buf = cachedEncoder.encode(arg);
@@ -99,16 +116,6 @@ export function greet(arg0) {
         
     }
     
-}
-
-const TextDecoder = typeof self === 'object' && self.TextDecoder
-    ? self.TextDecoder
-    : require('util').TextDecoder;
-
-let cachedDecoder = new TextDecoder('utf-8');
-
-function getStringFromWasm(ptr, len) {
-    return cachedDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
 }
 
 export function __wbindgen_throw(ptr, len) {

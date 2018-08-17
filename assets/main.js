@@ -8,6 +8,7 @@ wasmPromise
     const raysPerPixel = document.getElementById("raysPerPixel");
     const samplesLabel = document.getElementById("samplesLabel");
     const renderButton = document.getElementById("renderButton");
+    const renderTime = document.getElementById("renderTime");
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     raysPerPixel.value = "16";
@@ -28,20 +29,32 @@ wasmPromise
         const width = canvas.width;
         const height = canvas.height;
         const numberOfSamples = parseInt(samplesLabel.innerText, 10);
-        renderButton.disabled = true;
+        raysPerPixel.disabled = true;
         widthInput.disabled = true;
         heightInput.disabled = true;
+        renderButton.disabled = true;
         renderButton.innerText = "Rendering...";
+        renderTime.innerHTML = "";
         if (!timeoutHandler) {
             timeoutHandler = setTimeout(() => {
                 if (renderButton.disabled) {
+                    const t0 = performance.now();
                     const pixels = make_image(width, height, numberOfSamples);
                     const imageData = new ImageData(new Uint8ClampedArray(pixels.buffer), width, height);
                     ctx.putImageData(imageData, 0, 0);
+                    const t1 = performance.now();
+                    let delta = t1 - t0;
+                    if (delta <= 2000) {
+                        renderTime.innerHTML = `Render time: ${delta} milliseconds.`;
+                    }
+                    else {
+                        renderTime.innerHTML = `Render time: ${delta / 1000} seconds.`;
+                    }
                     renderButton.innerText = "Render";
-                    renderButton.disabled = false;
+                    raysPerPixel.disabled = false;
                     widthInput.disabled = false;
                     heightInput.disabled = false;
+                    renderButton.disabled = false;
                     timeoutHandler = null;
                 }
             }, 100);

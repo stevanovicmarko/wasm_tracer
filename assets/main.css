@@ -1,14 +1,14 @@
 body, html {
     background-color: ghostwhite;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: 0.9rem;
 }
 
-#canvas, #renderSettings {
+#root {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     align-items: flex-start;
-    margin: 0 auto;
 }
 
 #canvas {
@@ -19,25 +19,34 @@ body, html {
 
 #renderSettings {
     display: flex;
-    font-size: 0.8rem;
     flex-direction: column;
-    max-width: 200px;
-    margin: 10px auto;
+    margin-right: 10px;
+    min-width: 190px;
 }
 
-#renderSettings div:nth-last-child(2) {
+#renderSettings label {
+    display: block;
+    margin-top: 5px;
+}
+
+#renderSettings div:nth-last-child(3) {
     display: inherit;
     flex-direction: row;
     align-content: flex-start;
     align-items: center;
-    margin-bottom: 5px;
 }
 
-#renderSettings div:nth-last-child(2) input {
-    padding-left: 0;
-    margin-left: 0;
+#renderSettings div:nth-last-child(3) input {
+    padding: auto 0;
+    margin: auto 0;
 }
 
-#renderSettings div:last-child input {
-    /*margin-right: 10px;*/
+#renderSettings button {
+    margin-top: 5px;
+}
+
+#renderTime {
+    display: block;
+    font-size: 0.8em;
+    margin-top: 5px;
 }

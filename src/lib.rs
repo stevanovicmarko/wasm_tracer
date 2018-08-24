@@ -59,7 +59,7 @@ fn make_random_array(len: usize) -> Vec<f32> {
     crypto
         .get_random_values(vec![0_u16; len])
         .into_iter()
-        .map(|x| (f32::from(x)) / max_val)
+        .map(|x| 1.0 - (2.0 * (f32::from(x) / max_val)))
         .collect::<Vec<f32>>()
 }
 
@@ -142,24 +142,26 @@ fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f
 
 #[wasm_bindgen]
 pub fn make_image(canvas_width: u16, canvas_height: u16, num_samples: u8) -> Vec<u32> {
-    let preallocate_capacity = usize::from(canvas_width) * usize::from(canvas_height);
+    let preallocated_capacity = usize::from(canvas_width) * usize::from(canvas_height);
 
     let samples_divider = f32::from(num_samples);
-
-    let mut image = Vec::with_capacity(preallocate_capacity);
-
     let (camera, world) = get_predefined_scene(canvas_width, canvas_height);
 
     let mut pixel_color = vec3(0.0, 0.0, 0.0);
+    let mut image = Vec::<u32>::with_capacity(preallocated_capacity);
+
+    // generate precomputed displacements
+    let xs = make_random_array(usize::from(num_samples));
+    let ys = make_random_array(usize::from(num_samples));
 
     for i in 0..canvas_height {
         for j in 0..canvas_width {
             pixel_color.x = 0.0;
             pixel_color.y = 0.0;
             pixel_color.z = 0.0;
-            for _s in 0..num_samples {
-                let dx = (f32::from(j) + 1.0 - (2.0 * random())) / f32::from(canvas_width);
-                let dy = (f32::from(i) + 1.0 - (2.0 * random())) / f32::from(canvas_height);
+            for k in 0..num_samples {
+                let dx = (f32::from(j) + xs[usize::from(k)]) / f32::from(canvas_width);
+                let dy = (f32::from(i) + ys[usize::from(k)]) / f32::from(canvas_height);
 
                 let direction = camera.get_ray(dx, dy);
                 pixel_color += generate_color_for_pixel(&direction, &world, 0);

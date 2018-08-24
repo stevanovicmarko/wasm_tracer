@@ -28,6 +28,7 @@ impl World {
     pub fn trace(&self, ray: &Ray) -> Option<ShadeRecord> {
         let mut shade_record: Option<ShadeRecord> = None;
         let mut closest_so_far = self.t_max;
+
         for object in &self.objects {
             if let Some(rec) = object.hit(ray, self.t_min, closest_so_far) {
                 closest_so_far = rec.intersect_parameter;

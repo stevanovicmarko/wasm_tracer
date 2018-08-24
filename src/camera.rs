@@ -30,9 +30,9 @@ pub struct Camera {
 
 impl Camera {
     pub fn new(
-        look_from: Point3<f32>,
-        look_at: Point3<f32>,
-        up: Vector3<f32>,
+        look_from: &Point3<f32>,
+        look_at: &Point3<f32>,
+        up: &Vector3<f32>,
         v_fov: f32,
         aspect: f32,
         aperture: f32,
@@ -42,7 +42,7 @@ impl Camera {
         let theta = v_fov * f32::consts::PI / 180.0;
         let half_height = (theta / 2.0).tan();
         let half_width = aspect * half_height;
-        let origin = look_from;
+        let origin = *look_from;
         let w = (look_from - look_at).normalize();
         let u = up.cross(w).normalize();
         let v = w.cross(u);

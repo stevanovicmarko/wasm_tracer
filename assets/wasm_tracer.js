@@ -51,12 +51,61 @@ export function __wbg_static_accessor_crypto_crypto() {
     return addHeapObject(crypto);
 }
 
+const __wbg_getRandomValues_fd209086c610a656_target = Crypto.prototype.getRandomValues  || function() {
+    throw new Error(`wasm-bindgen: Crypto.prototype.getRandomValues does not exist`);
+} ;
+
+const stack = [];
+
+function getObject(idx) {
+    if ((idx & 1) === 1) {
+        return stack[idx >> 1];
+    } else {
+        const val = slab[idx >> 1];
+        
+        return val.obj;
+        
+    }
+}
+
+let cachegetUint16Memory = null;
+function getUint16Memory() {
+    if (cachegetUint16Memory === null || cachegetUint16Memory.buffer !== wasm.memory.buffer) {
+        cachegetUint16Memory = new Uint16Array(wasm.memory.buffer);
+    }
+    return cachegetUint16Memory;
+}
+
+function getArrayU16FromWasm(ptr, len) {
+    return getUint16Memory().subarray(ptr / 2, ptr / 2 + len);
+}
+
+function passArray16ToWasm(arg) {
+    const ptr = wasm.__wbindgen_malloc(arg.length * 2);
+    getUint16Memory().set(arg, ptr / 2);
+    return [ptr, arg.length];
+}
+
 let cachegetUint32Memory = null;
 function getUint32Memory() {
     if (cachegetUint32Memory === null || cachegetUint32Memory.buffer !== wasm.memory.buffer) {
         cachegetUint32Memory = new Uint32Array(wasm.memory.buffer);
     }
     return cachegetUint32Memory;
+}
+
+export function __wbg_getRandomValues_fd209086c610a656(ret, arg0, arg1, arg2) {
+    let varg1 = getArrayU16FromWasm(arg1, arg2);
+    
+    varg1 = varg1.slice();
+    wasm.__wbindgen_free(arg1, arg2 * 2);
+    
+    
+    const [retptr, retlen] = passArray16ToWasm(__wbg_getRandomValues_fd209086c610a656_target.call(getObject(arg0), varg1));
+    const mem = getUint32Memory();
+    mem[ret / 4] = retptr;
+    mem[ret / 4 + 1] = retlen;
+    
 }
 
 function getArrayU32FromWasm(ptr, len) {

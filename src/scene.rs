@@ -77,9 +77,9 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
     let aperture = 0.1;
 
     let camera = Camera::new(
-        look_from,
-        look_at,
-        v_up,
+        &look_from,
+        &look_at,
+        &v_up,
         20.0,
         f32::from(canvas_width) / f32::from(canvas_height),
         aperture,

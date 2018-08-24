@@ -42,7 +42,7 @@ impl GeometricObject for Sphere {
         );
 
         if discriminant > 0.0 {
-            let option_t = if near > t_min && near < t_max {
+            let option_t: Option<f32> = if near > t_min && near < t_max {
                 Some(near)
             } else if far > t_min && far < t_max {
                 Some(far)

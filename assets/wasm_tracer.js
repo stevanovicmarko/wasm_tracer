@@ -7,31 +7,6 @@ export function __wbg_random_366170509e85d0ad() {
     return __wbg_random_366170509e85d0ad_target();
 }
 
-const __wbg_log_c2c9fba8d792162f_target = console.log;
-
-const TextDecoder = typeof self === 'object' && self.TextDecoder
-    ? self.TextDecoder
-    : require('util').TextDecoder;
-
-let cachedDecoder = new TextDecoder('utf-8');
-
-let cachegetUint8Memory = null;
-function getUint8Memory() {
-    if (cachegetUint8Memory === null || cachegetUint8Memory.buffer !== wasm.memory.buffer) {
-        cachegetUint8Memory = new Uint8Array(wasm.memory.buffer);
-    }
-    return cachegetUint8Memory;
-}
-
-function getStringFromWasm(ptr, len) {
-    return cachedDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
-}
-
-export function __wbg_log_c2c9fba8d792162f(arg0, arg1) {
-    let varg0 = getStringFromWasm(arg0, arg1);
-    __wbg_log_c2c9fba8d792162f_target(varg0);
-}
-
 const slab = [{ obj: undefined }, { obj: null }, { obj: true }, { obj: false }];
 
 let slab_next = slab.length;
@@ -47,7 +22,7 @@ function addHeapObject(obj) {
     return idx << 1;
 }
 
-export function __wbg_static_accessor_crypto_crypto() {
+export function __wbg_static_accessor_crypto_967420e45de42e19() {
     return addHeapObject(crypto);
 }
 
@@ -123,11 +98,12 @@ function globalArgumentPtr() {
 * @param {number} arg0
 * @param {number} arg1
 * @param {number} arg2
+* @param {boolean} arg3
 * @returns {Uint32Array}
 */
-export function make_image(arg0, arg1, arg2) {
+export function make_image(arg0, arg1, arg2, arg3) {
     const retptr = globalArgumentPtr();
-    wasm.make_image(retptr, arg0, arg1, arg2);
+    wasm.make_image(retptr, arg0, arg1, arg2, arg3 ? 1 : 0);
     const mem = getUint32Memory();
     const rustptr = mem[retptr / 4];
     const rustlen = mem[retptr / 4 + 1];
@@ -143,6 +119,14 @@ const TextEncoder = typeof self === 'object' && self.TextEncoder
     : require('util').TextEncoder;
 
 let cachedEncoder = new TextEncoder('utf-8');
+
+let cachegetUint8Memory = null;
+function getUint8Memory() {
+    if (cachegetUint8Memory === null || cachegetUint8Memory.buffer !== wasm.memory.buffer) {
+        cachegetUint8Memory = new Uint8Array(wasm.memory.buffer);
+    }
+    return cachegetUint8Memory;
+}
 
 function passStringToWasm(arg) {
     
@@ -165,6 +149,16 @@ export function greet(arg0) {
         
     }
     
+}
+
+const TextDecoder = typeof self === 'object' && self.TextDecoder
+    ? self.TextDecoder
+    : require('util').TextDecoder;
+
+let cachedDecoder = new TextDecoder('utf-8');
+
+function getStringFromWasm(ptr, len) {
+    return cachedDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
 }
 
 export function __wbindgen_throw(ptr, len) {

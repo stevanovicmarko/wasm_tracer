@@ -29,14 +29,14 @@ body, html {
     margin-top: 5px;
 }
 
-#renderSettings div:nth-last-child(3) {
+#renderSettings div:nth-last-child(4) {
     display: inherit;
     flex-direction: row;
     align-content: flex-start;
     align-items: center;
 }
 
-#renderSettings div:nth-last-child(3) input {
+#renderSettings div:nth-last-child(4) input {
     padding: auto 0;
     margin: auto 0;
 }
@@ -49,4 +49,11 @@ body, html {
     display: block;
     font-size: 0.8em;
     margin-top: 5px;
+}
+
+#scene-type > div {
+    margin: 4px;
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
 }

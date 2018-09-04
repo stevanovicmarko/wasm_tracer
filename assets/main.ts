@@ -7,6 +7,7 @@ wasmPromise
         const heightInput = document.getElementById("canvasHeight") as HTMLInputElement;
         const raysPerPixel = document.getElementById("raysPerPixel") as HTMLInputElement;
         const samplesLabel = document.getElementById("samplesLabel") as HTMLSpanElement;
+        const radioButtons = document.getElementsByName("scene-select") as NodeListOf<HTMLInputElement>;
         const renderButton = document.getElementById("renderButton") as HTMLButtonElement;
         const renderTime = document.getElementById("renderTime") as HTMLSpanElement;
         const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -32,7 +33,17 @@ wasmPromise
 
         let timeoutHandler = null as (null | number);
 
+        let sceneType = "predefined-scene";
+
         renderButton.addEventListener("click", event => {
+            radioButtons.forEach(radioButton => {
+                if (radioButton.checked) {
+                    sceneType = radioButton.id;
+                }
+            });
+
+            const randomScene = sceneType !== "predefined-scene";
+
             const width = canvas.width;
             const height = canvas.height;
             const numberOfSamples = parseInt(samplesLabel.innerText, 10);
@@ -49,7 +60,7 @@ wasmPromise
                 timeoutHandler = setTimeout(() => {
                     if (renderButton.disabled) {
                         const t0 = performance.now();
-                        const pixels = make_image(width, height, numberOfSamples);
+                        const pixels = make_image(width, height, numberOfSamples, randomScene);
 
                         const imageData = new ImageData(
                             new Uint8ClampedArray(pixels.buffer),

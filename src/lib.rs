@@ -30,7 +30,7 @@ mod world;
 use world::World;
 
 mod scene;
-use scene::get_predefined_scene;
+use scene::{get_predefined_scene, get_random_scene};
 
 #[wasm_bindgen]
 extern "C" {
@@ -141,12 +141,16 @@ fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f
 }
 
 #[wasm_bindgen]
-pub fn make_image(canvas_width: u16, canvas_height: u16, num_samples: u8) -> Vec<u32> {
+pub fn make_image(canvas_width: u16, canvas_height: u16, num_samples: u8, random_scene: bool) -> Vec<u32> {
     let preallocated_capacity = usize::from(canvas_width) * usize::from(canvas_height);
 
     let samples_divider = f32::from(num_samples);
-    let (camera, world) = get_predefined_scene(canvas_width, canvas_height);
 
+    let (camera, world) = if random_scene == true {
+        get_random_scene(canvas_width, canvas_height, 10)
+    } else {
+        get_predefined_scene(canvas_width, canvas_height)
+    };
     let mut pixel_color = vec3(0.0, 0.0, 0.0);
     let mut image = Vec::<u32>::with_capacity(preallocated_capacity);
 
@@ -184,7 +188,8 @@ pub fn make_image(canvas_width: u16, canvas_height: u16, num_samples: u8) -> Vec
     image
 }
 
+// test to see if wasm-bindgen works
 #[wasm_bindgen]
-pub fn greet(name: &str) {
-    log(name);
+pub fn greet(_name: &str) {
+//    log(name);
 }

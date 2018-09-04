@@ -9,6 +9,7 @@ use Camera;
 use Material;
 use Sphere;
 use World;
+use super::random;
 
 pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, World) {
     let world = cascade! {
@@ -89,6 +90,73 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
     (camera, world)
 }
 
-pub fn get_random_scene(_number_of_spheres: usize) {
-    // TODO: Implement random scene
+pub fn get_random_scene(canvas_width: u16, canvas_height: u16, _number_of_spheres: usize) -> (Camera, World)  {
+    let (r, g, b) = (random(), random(), random());
+
+    let world = cascade! {
+        World::new();
+        ..add_object(Box::new(Sphere::new(
+        Point3::new(0.0, -1000.5, -1.0),
+        1000.0,
+        Material::Lambertian {
+            r: 0.2,
+            g: 0.8,
+            b: 0.3,
+        },
+        )));
+        ..add_object(Box::new(Sphere::new(
+        Point3::new(-0.7, -0.1, -0.4),
+        0.4,
+        Material::Metallic {
+            r,
+            g,
+            b,
+        },
+    )));
+            ..add_object(Box::new(Sphere::new(
+        Point3::new(0.0, 0.1, -1.5),
+        0.6,
+        Material::Dielectric { refractive_index: 1.5 + (0.5 * random()) },
+    )));
+            ..add_object(Box::new(Sphere::new(
+        Point3::new(0.9, 0.3, -3.5),
+        0.8,
+        Material::Lambertian {
+            r: 1.0 - r,
+            g: 1.0 - g,
+            b: 1.0 - b,
+        },
+    )));
+    };
+
+//    (0..number_of_spheres).for_each( |_item| {
+//        let radius = random() * 0.2;
+//        world.add_object(Box::new(Sphere::new(
+//            Point3::new(1.0 - (2.0*random()), radius, 10.0 * (1.0 - (2.0*random()))),
+//            radius,
+//            Material::Lambertian {
+//                r: random(),
+//                g: random(),
+//                b: random(),
+//            },
+//        )));
+//    });
+
+    let look_from = Point3::new(0.0, 0.8, 5.0);
+    let look_at = Point3::new(0.0, 0.0, -1.0);
+    let v_up = vec3(0.0, 1.0, 0.0);
+    let dist_to_focus = (look_from - look_at).magnitude();
+    let aperture = 0.15;
+
+    let camera = Camera::new(
+        &look_from,
+        &look_at,
+        &v_up,
+        20.0,
+        f32::from(canvas_width) / f32::from(canvas_height),
+        aperture,
+        dist_to_focus,
+    );
+
+    (camera, world)
 }

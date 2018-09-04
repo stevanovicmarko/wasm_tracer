@@ -7,7 +7,7 @@ authors = ["Marko Stevanović <stevanovicmarko@gmail.com>"]
 crate-type = ["cdylib"]
 
 [dependencies]
-wasm-bindgen = "0.2.17"
+wasm-bindgen = "0.2.19"
 cgmath = { version = "0.16.1", features = ["swizzle"] }
 cascade = "0.1.2"
 # lazy-static = "1.1.0"

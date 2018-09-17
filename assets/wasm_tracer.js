@@ -26,9 +26,9 @@ export function __wbg_static_accessor_crypto_967420e45de42e19() {
     return addHeapObject(crypto);
 }
 
-const __wbg_getRandomValues_fd209086c610a656_target = Crypto.prototype.getRandomValues  || function() {
+const __wbg_getRandomValues_fd209086c610a656_target = Crypto.prototype.getRandomValues || function() {
     throw new Error(`wasm-bindgen: Crypto.prototype.getRandomValues does not exist`);
-} ;
+};
 
 const stack = [];
 

@@ -3,6 +3,9 @@
 #[macro_use]
 extern crate cascade;
 
+#[macro_use]
+extern crate lazy_static;
+
 extern crate cgmath;
 extern crate wasm_bindgen;
 
@@ -50,17 +53,18 @@ extern "C" {
 }
 
 fn make_random_array(len: usize) -> Vec<f32> {
-    // let xs = 0..len;
-
-    // let ys = xs.map(|_x| 2.0 - random() - 1.0).collect::<Vec<f32>>();
-    // ys
     let max_val = f32::from(u16::MAX);
 
     crypto
         .get_random_values(vec![0_u16; len])
         .into_iter()
-        .map(|x| 1.0 - (2.0 * (f32::from(x) / max_val)))
-        .collect::<Vec<f32>>()
+        .map(|x: u16| 1.0 - (2.0 * (f32::from(x) / max_val)))
+        .collect::<Vec<_>>()
+}
+
+lazy_static! {
+    static ref BACKGROUND_COLOR: Vector3<f32> = vec3(0.5, 0.7, 1.0);
+    static ref DARK_COLOR: Vector3<f32> = vec3(0.0, 0.0, 0.0);
 }
 
 fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f32> {
@@ -69,13 +73,12 @@ fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f
     let shade_record = world.trace(ray);
 
     let pixel_color: Vector3<f32> = match (shade_record, depth < 50) {
-
-        (Some(_), false) => vec3(0.0, 0.0, 0.0),
+        (_, false) => *DARK_COLOR,
         (None, _) => {
             let unit_direction = ray.direction.normalize();
             let t = (unit_direction.y + 1.0) * 0.5;
-            vec3(1.0, 1.0, 1.0).lerp(vec3(0.5, 0.7, 1.0), t)
-        },
+            vec3(1.0, 1.0, 1.0).lerp(*BACKGROUND_COLOR, t)
+        }
         (Some(ref rec), true) => {
             let accumulated_color: Vector3<f32> = match rec.material {
                 Lambertian { r, g, b } => {
@@ -143,7 +146,12 @@ fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f
 }
 
 #[wasm_bindgen]
-pub fn make_image(canvas_width: u16, canvas_height: u16, num_samples: u8, random_scene: bool) -> Vec<u32> {
+pub fn make_image(
+    canvas_width: u16,
+    canvas_height: u16,
+    num_samples: u8,
+    random_scene: bool,
+) -> Vec<u32> {
     let preallocated_capacity = usize::from(canvas_width) * usize::from(canvas_height);
 
     let samples_divider = f32::from(num_samples);
@@ -193,5 +201,5 @@ pub fn make_image(canvas_width: u16, canvas_height: u16, num_samples: u8, random
 // test to see if wasm-bindgen works
 #[wasm_bindgen]
 pub fn greet(_name: &str) {
-//    log(name);
+    //    log(name);
 }

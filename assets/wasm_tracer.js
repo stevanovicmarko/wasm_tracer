@@ -15,9 +15,9 @@ function addHeapObject(obj) {
     if (slab_next === slab.length) slab.push(slab.length + 1);
     const idx = slab_next;
     const next = slab[idx];
-    
+
     slab_next = next;
-    
+
     slab[idx] = { obj, cnt: 1 };
     return idx << 1;
 }
@@ -37,9 +37,9 @@ function getObject(idx) {
         return stack[idx >> 1];
     } else {
         const val = slab[idx >> 1];
-        
+
         return val.obj;
-        
+
     }
 }
 
@@ -71,16 +71,16 @@ function getUint32Memory() {
 
 export function __wbg_getRandomValues_fd209086c610a656(ret, arg0, arg1, arg2) {
     let varg1 = getArrayU16FromWasm(arg1, arg2);
-    
+
     varg1 = varg1.slice();
     wasm.__wbindgen_free(arg1, arg2 * 2);
-    
-    
+
+
     const [retptr, retlen] = passArray16ToWasm(__wbg_getRandomValues_fd209086c610a656_target.call(getObject(arg0), varg1));
     const mem = getUint32Memory();
     mem[ret / 4] = retptr;
     mem[ret / 4 + 1] = retlen;
-    
+
 }
 
 function getArrayU32FromWasm(ptr, len) {
@@ -107,11 +107,11 @@ export function make_image(arg0, arg1, arg2, arg3) {
     const mem = getUint32Memory();
     const rustptr = mem[retptr / 4];
     const rustlen = mem[retptr / 4 + 1];
-    
+
     const realRet = getArrayU32FromWasm(rustptr, rustlen).slice();
     wasm.__wbindgen_free(rustptr, rustlen * 4);
     return realRet;
-    
+
 }
 
 const TextEncoder = typeof self === 'object' && self.TextEncoder
@@ -129,7 +129,7 @@ function getUint8Memory() {
 }
 
 function passStringToWasm(arg) {
-    
+
     const buf = cachedEncoder.encode(arg);
     const ptr = wasm.__wbindgen_malloc(buf.length);
     getUint8Memory().set(buf, ptr);
@@ -143,12 +143,12 @@ export function greet(arg0) {
     const [ptr0, len0] = passStringToWasm(arg0);
     try {
         return wasm.greet(ptr0, len0);
-        
+
     } finally {
         wasm.__wbindgen_free(ptr0, len0 * 1);
-        
+
     }
-    
+
 }
 
 const TextDecoder = typeof self === 'object' && self.TextDecoder
@@ -164,6 +164,4 @@ function getStringFromWasm(ptr, len) {
 export function __wbindgen_throw(ptr, len) {
     throw new Error(getStringFromWasm(ptr, len));
 }
-
-export function __wbindgen_Math_tan(x) { return Math.tan(x); }
 

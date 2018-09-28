@@ -151,7 +151,7 @@ pub fn make_image(
     canvas_height: u16,
     num_samples: u8,
     random_scene: bool,
-) -> Vec<u32> {
+)-> Vec<u32> {
     let preallocated_capacity = usize::from(canvas_width) * usize::from(canvas_height);
 
     let samples_divider = f32::from(num_samples);

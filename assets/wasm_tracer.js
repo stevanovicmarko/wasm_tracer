@@ -114,11 +114,9 @@ export function make_image(arg0, arg1, arg2, arg3) {
 
 }
 
-const TextEncoder = typeof self === 'object' && self.TextEncoder
-    ? self.TextEncoder
-    : require('util').TextEncoder;
+const lTextEncoder = typeof TextEncoder === 'undefined' ? require('util').TextEncoder : TextEncoder;
 
-let cachedEncoder = new TextEncoder('utf-8');
+let cachedTextEncoder = new lTextEncoder('utf-8');
 
 let cachegetUint8Memory = null;
 function getUint8Memory() {
@@ -130,7 +128,7 @@ function getUint8Memory() {
 
 function passStringToWasm(arg) {
 
-    const buf = cachedEncoder.encode(arg);
+    const buf = cachedTextEncoder.encode(arg);
     const ptr = wasm.__wbindgen_malloc(buf.length);
     getUint8Memory().set(buf, ptr);
     return [ptr, buf.length];
@@ -151,14 +149,12 @@ export function greet(arg0) {
 
 }
 
-const TextDecoder = typeof self === 'object' && self.TextDecoder
-    ? self.TextDecoder
-    : require('util').TextDecoder;
+const lTextDecoder = typeof TextDecoder === 'undefined' ? require('util').TextDecoder : TextDecoder;
 
-let cachedDecoder = new TextDecoder('utf-8');
+let cachedTextDecoder = new lTextDecoder('utf-8');
 
 function getStringFromWasm(ptr, len) {
-    return cachedDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
+    return cachedTextDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
 }
 
 export function __wbindgen_throw(ptr, len) {

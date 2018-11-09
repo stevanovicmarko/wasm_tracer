@@ -1,10 +1,10 @@
 /* tslint:disable */
 import * as wasm from './wasm_tracer_bg';
 
-const __wbg_random_366170509e85d0ad_target = Math.random;
+const __wbg_random_5ff3cf812d93001c_target = Math.random;
 
-export function __wbg_random_366170509e85d0ad() {
-    return __wbg_random_366170509e85d0ad_target();
+export function __wbg_random_5ff3cf812d93001c() {
+    return __wbg_random_5ff3cf812d93001c_target();
 }
 
 const slab = [{ obj: undefined }, { obj: null }, { obj: true }, { obj: false }];
@@ -22,12 +22,12 @@ function addHeapObject(obj) {
     return idx << 1;
 }
 
-export function __wbg_static_accessor_crypto_967420e45de42e19() {
+export function __wbg_static_accessor_crypto_b5cee419b00f1120() {
     return addHeapObject(crypto);
 }
 
-const __wbg_getRandomValues_fd209086c610a656_target = Crypto.prototype.getRandomValues || function() {
-    throw new Error(`wasm-bindgen: Crypto.prototype.getRandomValues does not exist`);
+const __wbg_getRandomValues_2872bad060fef1a7_target = typeof Crypto === 'undefined' ? null : Crypto.prototype.getRandomValues || function() {
+    throw new Error(`wasm-bindgen: Crypto.getRandomValues does not exist`);
 };
 
 const stack = [];
@@ -69,14 +69,14 @@ function getUint32Memory() {
     return cachegetUint32Memory;
 }
 
-export function __wbg_getRandomValues_fd209086c610a656(ret, arg0, arg1, arg2) {
+export function __wbg_getRandomValues_2872bad060fef1a7(ret, arg0, arg1, arg2) {
     let varg1 = getArrayU16FromWasm(arg1, arg2);
 
     varg1 = varg1.slice();
     wasm.__wbindgen_free(arg1, arg2 * 2);
 
 
-    const [retptr, retlen] = passArray16ToWasm(__wbg_getRandomValues_fd209086c610a656_target.call(getObject(arg0), varg1));
+    const [retptr, retlen] = passArray16ToWasm(__wbg_getRandomValues_2872bad060fef1a7_target.call(getObject(arg0), varg1));
     const mem = getUint32Memory();
     mem[ret / 4] = retptr;
     mem[ret / 4 + 1] = retlen;
@@ -147,6 +147,24 @@ export function greet(arg0) {
 
     }
 
+}
+
+function dropRef(idx) {
+
+    idx = idx >> 1;
+    if (idx < 4) return;
+    let obj = slab[idx];
+
+    obj.cnt -= 1;
+    if (obj.cnt > 0) return;
+
+    // If we hit 0 then free up our space in the slab
+    slab[idx] = slab_next;
+    slab_next = idx;
+}
+
+export function __wbindgen_object_drop_ref(i) {
+    dropRef(i);
 }
 
 const lTextDecoder = typeof TextDecoder === 'undefined' ? require('util').TextDecoder : TextDecoder;

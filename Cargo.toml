@@ -1,16 +1,16 @@
 [package]
 name = "wasm_tracer"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Marko Stevanović <stevanovicmarko@gmail.com>"]
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-wasm-bindgen = "0.2.25"
+wasm-bindgen = "0.2.27"
 cgmath = { version = "0.16.1", features = ["swizzle"] }
 cascade = "0.1.2"
-lazy_static ="1.1.0"
+lazy_static ="1.2.0"
 # rand = "0.5.4"
 # wbg-rand = "0.4"
 # num =  {version = "0.2.0", default-features = false }

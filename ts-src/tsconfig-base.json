@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "pretty": true,
+    "composite": true,
+    "strict": true,
+    "sourceMap": true,
+    "declarationMap": true,
+    "target": "ES2017",
+    "module": "ESNext",
+    "outDir": "../assets",
+  }
+}

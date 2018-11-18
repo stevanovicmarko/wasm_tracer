@@ -7,13 +7,15 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "build:ts": "tsc",
-    "build:wasm": "cargo +nightly build --release --target wasm32-unknown-unknown && wasm-bindgen target/wasm32-unknown-unknown/release/wasm_tracer.wasm --out-dir ./assets/",
-    "serve": "concurrently --kill-others \"tsc -w\" \"webpack-dev-server\"",
-    "clean": "rimraf assets/*.js assets/*.wasm assets/*.d.ts target/wasm32-unknown-unknown/"
+    "build:ts": "tsc -b",
+    "build:wasm": "cargo +nightly build --release --target wasm32-unknown-unknown && wasm-bindgen target/wasm32-unknown-unknown/release/wasm_tracer.wasm --no-modules --out-dir ./assets/",
+    "postbuild:wasm": "copyfiles -u 1 assets/wasm_tracer.d.ts ts-src/workers/typings/ && rimraf assets/wasm_tracer.d.ts",
+    "serve": "concurrently --kill-others \"tsc -b -w\" \"webpack-dev-server --hot\"",
+    "clean": "rimraf assets/*.js assets/*.wasm assets/*.d.ts assets/*.map target/wasm32-unknown-unknown/"
   },
   "devDependencies": {
     "concurrently": "^4.0.1",
+    "copyfiles": "^2.1.0",
     "prettier": "^1.15.1",
     "rimraf": "^2.6.2",
     "tslint": "^5.11.0",

@@ -201,5 +201,5 @@ pub fn make_image(
 // test to see if wasm-bindgen works
 #[wasm_bindgen]
 pub fn greet(_name: &str) {
-    //    log(name);
+    log(_name);
 }

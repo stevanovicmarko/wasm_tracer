@@ -152,17 +152,17 @@ pub fn make_image(
     num_samples: u8,
     random_scene: bool,
 )-> Vec<u32> {
-    let preallocated_capacity = usize::from(canvas_width) * usize::from(canvas_height);
+    let preallocate_capacity = usize::from(canvas_width) * usize::from(canvas_height);
 
     let samples_divider = f32::from(num_samples);
 
     let (camera, world) = if random_scene == true {
-        get_random_scene(canvas_width, canvas_height, 10)
+        get_random_scene(canvas_width, canvas_height, 20)
     } else {
         get_predefined_scene(canvas_width, canvas_height)
     };
     let mut pixel_color = vec3(0.0, 0.0, 0.0);
-    let mut image = Vec::<u32>::with_capacity(preallocated_capacity);
+    let mut image = Vec::<u32>::with_capacity(preallocate_capacity);
 
     // generate precomputed displacements
     let xs = make_random_array(usize::from(num_samples));

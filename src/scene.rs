@@ -2,7 +2,7 @@ extern crate cascade;
 extern crate cgmath;
 
 use cgmath::prelude::*;
-use cgmath::{vec3, Point3};
+use cgmath::{vec3, Vector3, Point3};
 use std::{f32, u16, usize};
 
 use super::random;
@@ -93,58 +93,35 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
 pub fn get_random_scene(
     canvas_width: u16,
     canvas_height: u16,
-    _number_of_spheres: usize,
+    number_of_spheres: usize,
 ) -> (Camera, World) {
     let (r, g, b) = (random(), random(), random());
 
-    let world = cascade! {
+    let centre_of_the_world = Point3::new(0.0, -1000.5, -1.0);
+
+    let mut world = cascade! {
         World::new();
         ..add_object(Box::new(Sphere::new(
-        Point3::new(0.0, -1000.5, -1.0),
+        centre_of_the_world,
         1000.0,
-        Material::Lambertian {
-            r: 0.2,
-            g: 0.8,
-            b: 0.3,
-        },
+        Material::Lambertian { r, g, b }
         )));
-        ..add_object(Box::new(Sphere::new(
-        Point3::new(-0.7, -0.1, -0.4),
-        0.4,
-        Material::Metallic {
-            r,
-            g,
-            b,
-        },
-    )));
-        ..add_object(Box::new(Sphere::new(
-        Point3::new(0.0, 0.1, -1.5),
-        0.6,
-        Material::Dielectric { refractive_index: 1.5 + (0.5 * random()) },
-    )));
-            ..add_object(Box::new(Sphere::new(
-        Point3::new(0.9, 0.3, -3.5),
-        0.8,
-        Material::Lambertian {
-            r: 1.0 - r,
-            g: 1.0 - g,
-            b: 1.0 - b,
-        },
-    )));
     };
 
-    //    (0..number_of_spheres).for_each( |_item| {
-    //        let radius = random() * 0.2;
-    //        world.add_object(Box::new(Sphere::new(
-    //            Point3::new(1.0 - (2.0*random()), radius, 10.0 * (1.0 - (2.0*random()))),
-    //            radius,
-    //            Material::Lambertian {
-    //                r: random(),
-    //                g: random(),
-    //                b: random(),
-    //            },
-    //        )));
-    //    });
+    (0..number_of_spheres).for_each( |_item| {
+        let radius = random() * 0.5;
+        let direction: Vector3<f32> = vec3(1.5 - 3.0 * random(), 0.0, 5.0 - 10.0 * random());
+
+        world.add_object(Box::new(Sphere::new(
+            Point3::new(direction.x, direction.y, direction.z),
+            radius,
+            Material::Lambertian {
+                r: random(),
+                g: random(),
+                b: random(),
+            },
+        )));
+    });
 
     let look_from = Point3::new(0.0, 0.8, 5.0);
     let look_at = Point3::new(0.0, 0.0, -1.0);

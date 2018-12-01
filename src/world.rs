@@ -1,10 +1,6 @@
-extern crate cgmath;
+use std::f32;
 
-use f32;
-
-use GeometricObject;
-use Ray;
-use ShadeRecord;
+use crate::{geometric_objects::GeometricObject, ray::Ray, shade_record::ShadeRecord};
 
 pub struct World {
     t_min: f32,

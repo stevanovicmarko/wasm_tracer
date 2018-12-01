@@ -1,10 +1,8 @@
-extern crate cgmath;
-
 use cgmath::prelude::*;
 use cgmath::{vec3, Vector3};
 use std::f32;
 
-use random;
+use crate::random;
 
 pub fn reflected_vector(v: &Vector3<f32>, n: &Vector3<f32>) -> Vector3<f32> {
     v - n * 2.0 * v.dot(*n)

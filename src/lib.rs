@@ -1,39 +1,24 @@
-#![allow(dead_code)]
-
-#[macro_use]
-extern crate cascade;
-
-#[macro_use]
-extern crate lazy_static;
-
-extern crate cgmath;
-extern crate wasm_bindgen;
-
+use lazy_static::lazy_static;
 use cgmath::prelude::*;
 use cgmath::{vec3, Vector3};
 use std::{f32, mem, u16, usize};
 use wasm_bindgen::prelude::*;
 
-mod ray;
-use ray::Ray;
-
-mod materials;
-use materials::*;
-
 mod camera;
-use camera::Camera;
-
 mod geometric_objects;
-use geometric_objects::{GeometricObject, Sphere};
-
-mod shade_record;
-use shade_record::ShadeRecord;
-
-mod world;
-use world::World;
-
+mod materials;
+mod ray;
 mod scene;
-use scene::{get_predefined_scene, get_random_scene};
+mod shade_record;
+mod world;
+
+use crate::materials::{
+    generate_reflect_probability, random_vec_in_unit_sphere, reflected_vector, refracted_vector,
+    Material::*,
+};
+use crate::ray::Ray;
+use crate::scene::{get_predefined_scene, get_random_scene};
+use crate::world::World;
 
 #[wasm_bindgen]
 extern "C" {
@@ -68,8 +53,6 @@ lazy_static! {
 }
 
 fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f32> {
-    use Material::*;
-
     let shade_record = world.trace(ray);
 
     let pixel_color: Vector3<f32> = match (shade_record, depth < 50) {
@@ -151,7 +134,7 @@ pub fn make_image(
     canvas_height: u16,
     num_samples: u8,
     random_scene: bool,
-)-> Vec<u32> {
+) -> Vec<u32> {
     let preallocate_capacity = usize::from(canvas_width) * usize::from(canvas_height);
 
     let samples_divider = f32::from(num_samples);

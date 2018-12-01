@@ -1,15 +1,9 @@
-extern crate cascade;
-extern crate cgmath;
-
+use cascade::cascade;
 use cgmath::prelude::*;
-use cgmath::{vec3, Vector3, Point3};
+use cgmath::{vec3, Point3, Vector3};
 use std::{f32, u16, usize};
 
-use super::random;
-use Camera;
-use Material;
-use Sphere;
-use World;
+use crate::{random, camera::Camera, materials::Material, geometric_objects::Sphere, world::World};
 
 pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, World) {
     let world = cascade! {
@@ -108,7 +102,7 @@ pub fn get_random_scene(
         )));
     };
 
-    (0..number_of_spheres).for_each( |_item| {
+    (0..number_of_spheres).for_each(|_item| {
         let radius = random() * 0.5;
         let direction: Vector3<f32> = vec3(1.5 - 3.0 * random(), 0.0, 5.0 - 10.0 * random());
 

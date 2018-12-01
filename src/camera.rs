@@ -1,12 +1,9 @@
-extern crate cgmath;
-
 use cgmath::prelude::*;
 use cgmath::{vec3, Point3, Vector3};
 use std::f32;
 
-use ray::Ray;
-
-use super::random;
+use crate::random;
+use crate::Ray;
 
 fn random_vec_in_disc() -> Vector3<f32> {
     let r = random().sqrt();
@@ -24,7 +21,7 @@ pub struct Camera {
     top_left_corner: Vector3<f32>,
     u: Vector3<f32>,
     v: Vector3<f32>,
-    w: Vector3<f32>,
+    // w: Vector3<f32>,
     lens_radius: f32,
 }
 
@@ -62,7 +59,7 @@ impl Camera {
             top_left_corner,
             u,
             v,
-            w,
+            // w,
             lens_radius,
         }
     }

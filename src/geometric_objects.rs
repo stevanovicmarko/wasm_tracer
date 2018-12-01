@@ -4,9 +4,9 @@ use cgmath::prelude::*;
 use cgmath::{Point3, Vector3};
 use std::f32;
 
-use materials::Material;
-use ray::Ray;
-use shade_record::ShadeRecord;
+use crate::materials::Material;
+use crate::Ray;
+use crate::shade_record::ShadeRecord;
 
 pub trait GeometricObject {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<ShadeRecord>;

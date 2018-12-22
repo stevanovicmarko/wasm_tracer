@@ -3,7 +3,13 @@ use cgmath::prelude::*;
 use cgmath::{vec3, Point3, Vector3};
 use std::{f32, u16, usize};
 
-use crate::{random, camera::Camera, materials::Material, geometric_objects::Sphere, world::World};
+use crate::{
+    camera::Camera,
+    geometric_objects::{MovingSphere, Sphere},
+    materials::Material,
+    random,
+    world::World,
+};
 
 pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, World) {
     let world = cascade! {
@@ -49,9 +55,12 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
             b: 0.2,
         },
     )));
-    ..add_object(Box::new(Sphere::new(
-        Point3::new(0.6, -0.2, -0.3),
-        0.3,
+    ..add_object(Box::new(MovingSphere::new(
+        Point3::new(0.6, 0.0, 0.1),
+        Point3::new(0.6, 0.1 + (0.3 * random()), 0.1),
+        0.0,
+        1.0,
+        0.25,
         Material::Lambertian {
             r: 0.25,
             g: 0.45,
@@ -79,6 +88,8 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
         f32::from(canvas_width) / f32::from(canvas_height),
         aperture,
         dist_to_focus,
+        0.0,
+        1.0,
     );
 
     (camera, world)
@@ -102,7 +113,7 @@ pub fn get_random_scene(
         )));
     };
 
-    (0..number_of_spheres).for_each(|_item| {
+    (0..number_of_spheres).for_each(|_| {
         let radius = random() * 0.5;
         let direction: Vector3<f32> = vec3(1.5 - 3.0 * random(), 0.0, 5.0 - 10.0 * random());
 
@@ -131,6 +142,8 @@ pub fn get_random_scene(
         f32::from(canvas_width) / f32::from(canvas_height),
         aperture,
         dist_to_focus,
+        0.0,
+        1.0,
     );
 
     (camera, world)

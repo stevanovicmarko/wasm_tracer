@@ -62,11 +62,12 @@ fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f
             let t = (unit_direction.y + 1.0) * 0.5;
             vec3(1.0, 1.0, 1.0).lerp(*BACKGROUND_COLOR, t)
         }
+        // TODO: Figure out how to add time=0.0 as default param for ray class
         (Some(ref rec), true) => {
             let accumulated_color: Vector3<f32> = match rec.material {
                 Lambertian { r, g, b } => {
                     let target = rec.local_hit_point + rec.normal + random_vec_in_unit_sphere();
-                    let bounced_ray = Ray::new(rec.local_hit_point, target - rec.local_hit_point);
+                    let bounced_ray = Ray::new(rec.local_hit_point, target - rec.local_hit_point, 0.0);
                     let v = generate_color_for_pixel(&bounced_ray, world, depth + 1);
                     vec3(v.x * r, v.y * g, v.z * b)
                 }
@@ -75,6 +76,7 @@ fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f
                     let scattered = Ray::new(
                         rec.local_hit_point,
                         reflected + 0.5 * random_vec_in_unit_sphere(),
+                        0.0
                     );
 
                     let v = if scattered.direction.dot(rec.normal) > 0.0 {
@@ -115,9 +117,9 @@ fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f
                     };
 
                     let bounced_ray = if random() < reflect_prob {
-                        Ray::new(rec.local_hit_point, reflected)
+                        Ray::new(rec.local_hit_point, reflected, 0.0)
                     } else {
-                        Ray::new(rec.local_hit_point, refracted)
+                        Ray::new(rec.local_hit_point, refracted, 0.0)
                     };
                     generate_color_for_pixel(&bounced_ray, world, depth + 1)
                 }

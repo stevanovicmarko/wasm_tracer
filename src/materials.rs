@@ -1,5 +1,5 @@
 use cgmath::prelude::*;
-use cgmath::{vec3, Vector3};
+use cgmath::{vec3, Vector3, Point3};
 use std::f32;
 
 use crate::random;
@@ -40,9 +40,32 @@ pub fn random_vec_in_unit_sphere() -> Vector3<f32> {
     random() * vec3(x, y, z)
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub enum Material {
-    Lambertian { r: f32, g: f32, b: f32 },
+    Lambertian { texture: Texture },
     Metallic { r: f32, g: f32, b: f32 },
     Dielectric { refractive_index: f32 },
+}
+
+#[derive(Clone)]
+pub enum Texture {
+    Constant{ r: f32, g: f32, b: f32 },
+    Checkerboard {left: Box<Texture>, right: Box<Texture>}
+}
+
+impl Texture {
+    pub fn value(&self, u: f32, v: f32, point: &Point3<f32>) -> Point3<f32> {
+        match self {
+            Texture::Constant{ r , g , b } => Point3::new(*r, *g, *b),
+            Texture::Checkerboard {left, right} => {
+                // TODO refactor into map-reduce
+                let sines = f32::sin(10.0 * point.x) * f32::sin(10.0 * point.y) * f32::sin(10.0 * point.z);
+                if sines < 0.0 {
+                    left.value(u, v, point)
+                } else {
+                    right.value(u, v, point)
+                }
+            }
+        }
+    }
 }

@@ -6,7 +6,7 @@ use std::{f32, u16, usize};
 use crate::{
     camera::Camera,
     geometric_objects::{MovingSphere, Sphere},
-    materials::Material,
+    materials::{Material, Texture},
     random,
     world::World,
 };
@@ -17,20 +17,26 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
         ..add_object(Box::new(Sphere::new(
         Point3::new(0.0, -1000.5, -1.0),
         1000.0,
-        Material::Lambertian {
+        Material::Lambertian { texture: Texture::Checkerboard{
+            left: Box::new(Texture::Constant{
             r: 0.2,
-            g: 0.8,
-            b: 0.3,
-        },
+            g: 0.3,
+            b: 0.1}),
+            right: Box::new(Texture::Constant{
+            r: 0.9,
+            g: 0.9,
+            b: 0.9}),
+        }},
         )));
         ..add_object(Box::new(Sphere::new(
         Point3::new(0.0, 0.1, -1.0),
         0.6,
         Material::Lambertian {
+            texture: Texture::Constant{
             r: 0.99,
             g: 0.1,
             b: 0.01,
-        },
+        }},
     )));
     ..add_object(Box::new(Sphere::new(
         Point3::new(1.1, 0.0, -1.0),
@@ -50,22 +56,24 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
         Point3::new(-1.2, -0.2, -1.0),
         0.3,
         Material::Lambertian {
+            texture: Texture::Constant{
             r: 0.9,
             g: 0.9,
             b: 0.2,
-        },
+        }},
     )));
     ..add_object(Box::new(MovingSphere::new(
-        Point3::new(0.6, 0.0, 0.1),
-        Point3::new(0.6, 0.1 + (0.3 * random()), 0.1),
+        Point3::new(0.6, -0.1, 0.1),
+        Point3::new(0.6, -0.1 + (0.35 * random()), 0.1),
         0.0,
         1.0,
-        0.25,
+        0.2,
         Material::Lambertian {
+            texture: Texture::Constant{
             r: 0.25,
             g: 0.45,
             b: 0.8,
-        },
+        }},
     )));
     ..add_object(Box::new(Sphere::new(
         Point3::new(-0.6, -0.35, -0.5),
@@ -74,7 +82,7 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
     )));
     };
 
-    let look_from = Point3::new(0.0, 0.9, 5.0);
+    let look_from = Point3::new(0.0, 0.3, 5.0);
     let look_at = Point3::new(0.0, 0.0, -1.0);
     let v_up = vec3(0.0, 1.0, 0.0);
     let dist_to_focus = (look_from - look_at).magnitude();
@@ -109,7 +117,7 @@ pub fn get_random_scene(
         ..add_object(Box::new(Sphere::new(
         centre_of_the_world,
         1000.0,
-        Material::Lambertian { r, g, b }
+        Material::Lambertian { texture: Texture::Constant{ r, g, b }}
         )));
     };
 
@@ -121,9 +129,11 @@ pub fn get_random_scene(
             Point3::new(direction.x, direction.y, direction.z),
             radius,
             Material::Lambertian {
-                r: random(),
-                g: random(),
-                b: random(),
+                texture: Texture::Constant {
+                    r: random(),
+                    g: random(),
+                    b: random(),
+                },
             },
         )));
     });

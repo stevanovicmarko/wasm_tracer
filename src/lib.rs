@@ -1,6 +1,6 @@
 use lazy_static::lazy_static;
 use cgmath::prelude::*;
-use cgmath::{vec3, Vector3};
+use cgmath::{vec3, Vector3, Point3};
 use std::{f32, mem, u16, usize};
 use wasm_bindgen::prelude::*;
 
@@ -64,11 +64,12 @@ fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f
         }
         // TODO: Figure out how to add time=0.0 as default param for ray class
         (Some(ref rec), true) => {
-            let accumulated_color: Vector3<f32> = match rec.material {
-                Lambertian { r, g, b } => {
+            let accumulated_color: Vector3<f32> = match &rec.material {
+                Lambertian { texture } => {
                     let target = rec.local_hit_point + rec.normal + random_vec_in_unit_sphere();
                     let bounced_ray = Ray::new(rec.local_hit_point, target - rec.local_hit_point, 0.0);
                     let v = generate_color_for_pixel(&bounced_ray, world, depth + 1);
+                    let Point3{ x: r, y: g, z: b} = texture.value(0.0, 0.0, &rec.local_hit_point);
                     vec3(v.x * r, v.y * g, v.z * b)
                 }
                 Metallic { r, g, b } => {
@@ -97,7 +98,7 @@ fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f
 
                     if ray.direction.dot(rec.normal) > 0.0 {
                         outward_normal = -rec.normal;
-                        ni_over_t = refractive_index;
+                        ni_over_t = *refractive_index;
                         cosine = ray.direction.dot(rec.normal) / ray.direction.magnitude();
                         cosine = (1.0
                             - refractive_index * refractive_index * (1.0 - cosine * cosine))
@@ -109,7 +110,7 @@ fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f
                     }
 
                     if let Some(x) = refracted_vector(&ray.direction, &outward_normal, ni_over_t) {
-                        reflect_prob = generate_reflect_probability(cosine, refractive_index);
+                        reflect_prob = generate_reflect_probability(cosine, *refractive_index);
                         refracted = x;
                     } else {
                         reflect_prob = 1.0;
@@ -167,7 +168,7 @@ pub fn make_image(
             }
             pixel_color /= samples_divider;
 
-            let (r, g, b) = pixel_color.into();
+            let Vector3{x: r, y: g, z: b} = pixel_color;
 
             let pixel = unsafe {
                 mem::transmute::<[u8; 4], u32>([

@@ -23,7 +23,7 @@ pub struct Camera {
     v: Vector3<f32>,
     lens_radius: f32,
     time_start: f32,
-    time_end: f32
+    time_end: f32,
 }
 
 impl Camera {
@@ -36,7 +36,7 @@ impl Camera {
         aperture: f32,
         focus_distance: f32,
         time_start: f32,
-        time_end: f32
+        time_end: f32,
     ) -> Self {
         let lens_radius = aperture / 2.0;
         let theta = v_fov * f32::consts::PI / 180.0;
@@ -64,7 +64,7 @@ impl Camera {
             v,
             lens_radius,
             time_start,
-            time_end
+            time_end,
         }
     }
 
@@ -76,7 +76,7 @@ impl Camera {
         Ray::new(
             self.origin + offset,
             self.top_left_corner + (Point3::new(x, y, z) - self.origin),
-            time
+            time,
         )
     }
 }

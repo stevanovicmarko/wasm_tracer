@@ -1,6 +1,7 @@
-use lazy_static::lazy_static;
+#![warn(clippy::all)]
 use cgmath::prelude::*;
-use cgmath::{vec3, Vector3, Point3};
+use cgmath::{vec3, Point3, Vector3};
+use lazy_static::lazy_static;
 use std::{f32, mem, u16, usize};
 use wasm_bindgen::prelude::*;
 
@@ -67,9 +68,10 @@ fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f
             let accumulated_color: Vector3<f32> = match &rec.material {
                 Lambertian { texture } => {
                     let target = rec.local_hit_point + rec.normal + random_vec_in_unit_sphere();
-                    let bounced_ray = Ray::new(rec.local_hit_point, target - rec.local_hit_point, 0.0);
+                    let bounced_ray =
+                        Ray::new(rec.local_hit_point, target - rec.local_hit_point, 0.0);
                     let v = generate_color_for_pixel(&bounced_ray, world, depth + 1);
-                    let Point3{ x: r, y: g, z: b} = texture.value(0.0, 0.0, &rec.local_hit_point);
+                    let Point3 { x: r, y: g, z: b } = texture.value(0.0, 0.0, &rec.local_hit_point);
                     vec3(v.x * r, v.y * g, v.z * b)
                 }
                 Metallic { r, g, b } => {
@@ -77,16 +79,15 @@ fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f
                     let scattered = Ray::new(
                         rec.local_hit_point,
                         reflected + 0.5 * random_vec_in_unit_sphere(),
-                        0.0
+                        0.0,
                     );
-
-                    let v = if scattered.direction.dot(rec.normal) > 0.0 {
+                    
+                    if scattered.direction.dot(rec.normal) > 0.0 {
                         let u = generate_color_for_pixel(&scattered, world, depth + 1);
                         vec3(u.x * r, u.y * g, u.z * b)
                     } else {
                         generate_color_for_pixel(&scattered, world, depth + 1)
-                    };
-                    v
+                    }
                 }
                 Dielectric { refractive_index } => {
                     let reflected = reflected_vector(&ray.direction, &rec.normal);
@@ -142,7 +143,7 @@ pub fn make_image(
 
     let samples_divider = f32::from(num_samples);
 
-    let (camera, world) = if random_scene == true {
+    let (camera, world) = if random_scene {
         get_random_scene(canvas_width, canvas_height, 20)
     } else {
         get_predefined_scene(canvas_width, canvas_height)
@@ -168,7 +169,7 @@ pub fn make_image(
             }
             pixel_color /= samples_divider;
 
-            let Vector3{x: r, y: g, z: b} = pixel_color;
+            let Vector3 { x: r, y: g, z: b } = pixel_color;
 
             let pixel = unsafe {
                 mem::transmute::<[u8; 4], u32>([

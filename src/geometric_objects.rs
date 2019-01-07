@@ -5,8 +5,8 @@ use cgmath::{Point3, Vector3};
 use std::f32;
 
 use crate::materials::Material;
-use crate::Ray;
 use crate::shade_record::ShadeRecord;
+use crate::Ray;
 
 pub trait GeometricObject {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<ShadeRecord>;
@@ -42,30 +42,28 @@ impl GeometricObject for Sphere {
         );
 
         if discriminant > 0.0 {
-            let option_t: Option<f32> = if near > t_min && near < t_max {
-                Some(near)
-            } else if far > t_min && far < t_max {
-                Some(far)
-            } else {
-                None
+            let option_t = match (near, far) {
+                (near, _) if near > t_min && near < t_max => Some(near),
+                (_, far) if far > t_min && far < t_max => Some(far),
+                _ => None,
             };
 
-            if let Some(intersect_parameter) = option_t {
+            option_t.and_then(|intersect_parameter| {
                 let local_hit_point = ray.point_at_parameter(intersect_parameter);
                 let normal = (local_hit_point - self.center) / self.radius;
 
-                return Some(ShadeRecord {
+                Some(ShadeRecord {
                     intersect_parameter,
                     local_hit_point,
                     normal,
                     material: self.material.clone(),
-                });
-            }
+                })
+            })
+        } else {
+            None
         }
-        None
     }
 }
-
 
 pub struct MovingSphere {
     center_start: Point3<f32>,
@@ -77,9 +75,14 @@ pub struct MovingSphere {
 }
 
 impl MovingSphere {
-    pub fn new(center_start: Point3<f32>, center_end: Point3<f32>,
-               time_start: f32, time_end: f32,
-               radius: f32, material: Material) -> Self {
+    pub fn new(
+        center_start: Point3<f32>,
+        center_end: Point3<f32>,
+        time_start: f32,
+        time_end: f32,
+        radius: f32,
+        material: Material,
+    ) -> Self {
         MovingSphere {
             center_start,
             center_end,
@@ -91,7 +94,9 @@ impl MovingSphere {
     }
 
     pub fn center(&self, time: f32) -> Point3<f32> {
-        self.center_start + ((time - self.time_start) / (self.time_end - self.time_start)) * (self.center_end - self.center_start)
+        self.center_start
+            + ((time - self.time_start) / (self.time_end - self.time_start))
+                * (self.center_end - self.center_start)
     }
 }
 

@@ -3,7 +3,7 @@
     const __exports = {};
 
 
-    __exports.__wbg_random_5ff3cf812d93001c = function() {
+    __exports.__wbg_random_264632962acb2936 = function() {
         return Math.random();
     };
 
@@ -21,7 +21,7 @@
         return cachedTextDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
     }
 
-    __exports.__wbg_log_f0a6e9af21e083ce = function(arg0, arg1) {
+    __exports.__wbg_log_662117e8889465af = function(arg0, arg1) {
         let varg0 = getStringFromWasm(arg0, arg1);
         console.log(varg0);
     };
@@ -43,7 +43,7 @@
         return idx;
     }
 
-    __exports.__wbg_static_accessor_crypto_b5cee419b00f1120 = function() {
+    __exports.__wbg_static_accessor_crypto_d6af21be7bc4961f = function() {
         return addHeapObject(crypto);
     };
 
@@ -78,7 +78,7 @@ function getUint32Memory() {
     return cachegetUint32Memory;
 }
 
-__exports.__wbg_getRandomValues_2872bad060fef1a7 = function(ret, arg0, arg1, arg2) {
+__exports.__wbg_getRandomValues_c1a4230a5f916f25 = function(ret, arg0, arg1, arg2) {
     let varg1 = getArrayU16FromWasm(arg1, arg2);
 
     varg1 = varg1.slice();

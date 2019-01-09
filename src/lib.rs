@@ -81,7 +81,7 @@ fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f
                         reflected + 0.5 * random_vec_in_unit_sphere(),
                         0.0,
                     );
-                    
+
                     if scattered.direction.dot(rec.normal) > 0.0 {
                         let u = generate_color_for_pixel(&scattered, world, depth + 1);
                         vec3(u.x * r, u.y * g, u.z * b)

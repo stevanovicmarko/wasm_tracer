@@ -114,26 +114,25 @@ impl GeometricObject for MovingSphere {
         );
 
         if discriminant > 0.0 {
-            let option_t: Option<f32> = if near > t_min && near < t_max {
-                Some(near)
-            } else if far > t_min && far < t_max {
-                Some(far)
-            } else {
-                None
+            let option_t = match (near, far) {
+                (near, _) if near > t_min && near < t_max => Some(near),
+                (_, far) if far > t_min && far < t_max => Some(far),
+                _ => None,
             };
 
-            if let Some(intersect_parameter) = option_t {
+            option_t.and_then(|intersect_parameter| {
                 let local_hit_point = ray.point_at_parameter(intersect_parameter);
                 let normal = (local_hit_point - self.center(ray.time)) / self.radius;
 
-                return Some(ShadeRecord {
+                Some(ShadeRecord {
                     intersect_parameter,
                     local_hit_point,
                     normal,
                     material: self.material.clone(),
-                });
-            }
+                })
+            })
+        } else {
+            None
         }
-        None
     }
 }

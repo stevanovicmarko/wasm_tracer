@@ -40,7 +40,6 @@ pub fn random_vec_in_unit_sphere() -> Vector3<f32> {
     random() * vec3(x, y, z)
 }
 
-
 #[derive(Clone)]
 pub enum Texture {
     Constant {

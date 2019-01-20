@@ -19,25 +19,19 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
         1000.0,
         Material::Lambertian { texture: Texture::Checkerboard{
             left: Box::new(Texture::Constant{
-            r: 0.2,
-            g: 0.3,
-            b: 0.1}),
+                color: Point3::new(0.2, 0.3, 0.1)}),
             right: Box::new(Texture::Constant{
-            r: 0.9,
-            g: 0.9,
-            b: 0.9}),
+                color: Point3::new(0.9, 0.9, 0.9)})
         }},
         )));
+
         ..add_object(Box::new(Sphere::new(
         Point3::new(0.0, 0.1, -1.0),
         0.6,
         Material::Lambertian {
             texture: Texture::Constant{
-            r: 0.99,
-            g: 0.1,
-            b: 0.01,
-        }},
-    )));
+                color: Point3::new(0.99, 0.1, 0.01)
+                }})));
     ..add_object(Box::new(Sphere::new(
         Point3::new(1.1, 0.0, -1.0),
         0.5,
@@ -57,9 +51,7 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
         0.3,
         Material::Lambertian {
             texture: Texture::Constant{
-            r: 0.9,
-            g: 0.9,
-            b: 0.2,
+                color: Point3::new(0.9, 0.9, 0.2)
         }},
     )));
     ..add_object(Box::new(MovingSphere::new(
@@ -70,9 +62,7 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
         0.2,
         Material::Lambertian {
             texture: Texture::Constant{
-            r: 0.25,
-            g: 0.45,
-            b: 0.8,
+                color: Point3::new(0.25, 0.45, 0.8)
         }},
     )));
     ..add_object(Box::new(Sphere::new(
@@ -117,7 +107,7 @@ pub fn get_random_scene(
         ..add_object(Box::new(Sphere::new(
         centre_of_the_world,
         1000.0,
-        Material::Lambertian { texture: Texture::Constant{ r, g, b }}
+        Material::Lambertian { texture: Texture::Constant{ color: Point3::new(r, g, b) }}
         )));
     };
 
@@ -130,9 +120,7 @@ pub fn get_random_scene(
             radius,
             Material::Lambertian {
                 texture: Texture::Constant {
-                    r: random(),
-                    g: random(),
-                    b: random(),
+                    color: Point3::new(random(), random(), random())
                 },
             },
         )));

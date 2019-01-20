@@ -43,9 +43,7 @@ pub fn random_vec_in_unit_sphere() -> Vector3<f32> {
 #[derive(Clone)]
 pub enum Texture {
     Constant {
-        r: f32,
-        g: f32,
-        b: f32,
+        color: Point3<f32>
     },
     Checkerboard {
         left: Box<Texture>,
@@ -53,10 +51,40 @@ pub enum Texture {
     },
 }
 
+struct Perlin {
+    random_vecs : [f32; 256],
+    random_x_direction: [i32; 256],
+    random_y_direction: [i32; 256],
+    random_z_direction: [i32; 256],
+}
+
+impl Perlin {
+    fn noise(&self, point: Point3<f32>) -> f32 {
+        // let u = point.x - point.x.floor();
+        // let v = point.y - point.y.floor();
+        // let w = point.z - point.z.floor();
+
+        let i = ((4.0 * point.x) as i32 & 255) as usize;
+        let j = ((4.0 * point.y) as i32 & 255) as usize;
+        let k = ((4.0 * point.z) as i32 & 255) as usize;
+        let index = (self.random_x_direction[i] ^ self.random_y_direction[j] ^ self.random_z_direction[k]) as usize;
+        self.random_vecs[index]
+    }
+
+    fn perlin_generate() -> Vec<f32> {
+       (0..256).map(|_| random()).collect::<Vec<_>>()
+    }
+
+    fn generate_perm() {
+        let range = (0..255).rev().map(|_| random()).collect::<Vec<_>>();
+
+    }
+}
+
 impl Texture {
     pub fn value(&self, u: f32, v: f32, point: &Point3<f32>) -> Point3<f32> {
         match self {
-            Texture::Constant { r, g, b } => Point3::new(*r, *g, *b),
+            Texture::Constant { color } => *color,
             Texture::Checkerboard { left, right } => {
                 let sines =
                     f32::sin(10.0 * point.x) * f32::sin(10.0 * point.y) * f32::sin(10.0 * point.z);
@@ -70,6 +98,8 @@ impl Texture {
         }
     }
 }
+
+
 
 #[derive(Clone)]
 pub enum Material {

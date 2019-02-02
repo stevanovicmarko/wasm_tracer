@@ -151,6 +151,10 @@ __exports.greet = function(arg0) {
 
 };
 
+__exports.__wbg_random_fabf73e8a709437c = function() {
+    return Math.random();
+};
+
 function dropObject(idx) {
     if (idx < 36) return;
     heap[idx] = heap_next;

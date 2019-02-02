@@ -1,6 +1,9 @@
+use arr_macro::arr;
 use cgmath::prelude::*;
 use cgmath::{vec3, Point3, Vector3};
+use lazy_static::lazy_static;
 use std::f32;
+use wbg_rand::{wasm_rng, Rng};
 
 use crate::random;
 
@@ -43,46 +46,114 @@ pub fn random_vec_in_unit_sphere() -> Vector3<f32> {
 #[derive(Clone)]
 pub enum Texture {
     Constant {
-        color: Point3<f32>
+        color: Point3<f32>,
     },
     Checkerboard {
         left: Box<Texture>,
         right: Box<Texture>,
     },
+    Noise,
 }
 
-struct Perlin {
-    random_vecs : [f32; 256],
-    random_x_direction: [i32; 256],
-    random_y_direction: [i32; 256],
-    random_z_direction: [i32; 256],
+#[derive(Clone)]
+pub struct Perlin {
+    pub scale_factor: f32,
+    pub random_vecs: [Vector3<f32>; 256],
+    pub random_x_direction: [i32; 256],
+    pub random_y_direction: [i32; 256],
+    pub random_z_direction: [i32; 256],
 }
 
+// TODO: Refactor perlin implementation
 impl Perlin {
-    fn noise(&self, point: Point3<f32>) -> f32 {
-        // let u = point.x - point.x.floor();
-        // let v = point.y - point.y.floor();
-        // let w = point.z - point.z.floor();
-
-        let i = ((4.0 * point.x) as i32 & 255) as usize;
-        let j = ((4.0 * point.y) as i32 & 255) as usize;
-        let k = ((4.0 * point.z) as i32 & 255) as usize;
-        let index = (self.random_x_direction[i] ^ self.random_y_direction[j] ^ self.random_z_direction[k]) as usize;
-        self.random_vecs[index]
+    pub fn new() -> Self {
+        Perlin {
+            scale_factor: 5.0,
+            random_vecs: Perlin::perlin_generate(),
+            random_x_direction: Perlin::generate_perm(),
+            random_y_direction: Perlin::generate_perm(),
+            random_z_direction: Perlin::generate_perm(),
+        }
     }
 
-    fn perlin_generate() -> Vec<f32> {
-       (0..256).map(|_| random()).collect::<Vec<_>>()
+    #[inline]
+    pub fn perlin_generate() -> [Vector3<f32>; 256] {
+        arr![vec3(-1.0 + 2.0 * random(), -1.0 + 2.0 * random(), -1.0 + 2.0 * random()).normalize(); 256]
     }
 
-    fn generate_perm() {
-        let range = (0..255).rev().map(|_| random()).collect::<Vec<_>>();
-
+    pub fn generate_perm() -> [i32; 256] {
+        let mut i = -1_i32;
+        let mut shuffled_array = arr![{ i += 1; i}; 256];
+        wasm_rng().shuffle(&mut shuffled_array);
+        shuffled_array
     }
+
+    pub fn generate_noise(point: &Point3<f32>) -> f32 {
+        let scaled_point = point * 1.0;
+        let u = scaled_point.x - scaled_point.x.floor();
+        let v = scaled_point.y - scaled_point.y.floor();
+        let w = scaled_point.z - scaled_point.z.floor();
+
+        let i = scaled_point.x.floor() as i32;
+        let j = scaled_point.y.floor() as i32;
+        let k = scaled_point.z.floor() as i32;
+
+        let mut c: [[[Vector3<f32>; 2]; 2]; 2] = [
+            [
+                [vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0)],
+                [vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0)],
+            ],
+            [
+                [vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0)],
+                [vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0)],
+            ],
+        ];
+        for di in 0..2 {
+            for dj in 0..2 {
+                for dk in 0..2 {
+                    let x_idx = ((i + di) & 255) as usize;
+                    let y_idx = ((j + dj) & 255) as usize;
+                    let z_idx = ((k + dk) & 255) as usize;
+
+                    let rand_x = MY_PERLIN.random_x_direction[x_idx];
+                    let rand_y = MY_PERLIN.random_y_direction[y_idx];
+                    let rand_z = MY_PERLIN.random_z_direction[z_idx];
+
+                    let index = (rand_x ^ rand_y ^ rand_z) as usize;
+
+                    c[di as usize][dj as usize][dk as usize] = MY_PERLIN.random_vecs[index];
+                }
+            }
+        }
+
+        let uu = u * u * (3.0 - 2.0 * u);
+        let vv = v * v * (3.0 - 2.0 * v);
+        let ww = w * w * (3.0 - 2.0 * w);
+
+        let mut acc = 0.0;
+
+        for i in 0..2 {
+            for j in 0..2 {
+                for k in 0..2 {
+                    let weight_v = vec3(u - i as f32, v - j as f32, w - k as f32);
+                    acc += (i as f32 * uu + (1.0 - i as f32) * (1.0 - uu))
+                        * (j as f32 * vv + (1.0 - j as f32) * (1.0 - vv))
+                        * (k as f32 * ww + (1.0 - k as f32) * (1.0 - ww))
+                        * weight_v.dot(c[i as usize][j as usize][k as usize]);
+                }
+            }
+        }
+
+        acc
+    }
+}
+
+lazy_static! {
+    static ref MY_PERLIN: Perlin = Perlin::new();
 }
 
 impl Texture {
-    pub fn value(&self, u: f32, v: f32, point: &Point3<f32>) -> Point3<f32> {
+    pub fn value(&self, x: f32, y: f32, point: &Point3<f32>) -> Point3<f32> {
         match self {
             Texture::Constant { color } => *color,
             Texture::Checkerboard { left, right } => {
@@ -90,16 +161,26 @@ impl Texture {
                     f32::sin(10.0 * point.x) * f32::sin(10.0 * point.y) * f32::sin(10.0 * point.z);
 
                 if sines < 0.0 {
-                    left.value(u, v, point)
+                    left.value(x, y, point)
                 } else {
-                    right.value(u, v, point)
+                    right.value(x, y, point)
                 }
+            }
+            Texture::Noise => {
+                let mut acc = 0.0;
+                let mut temp_p = *point;
+                let mut weight = 1.0;
+                for _i in 0..7 {
+                    acc += weight * Perlin::generate_noise(&temp_p);
+                    weight *= 0.5;
+                    temp_p *= 2.0;
+                }
+
+                Point3::new(1.0, 1.0, 1.0) * 0.5 * (1.0 + f32::sin(MY_PERLIN.scale_factor * point.z + 10.0 * acc))
             }
         }
     }
 }
-
-
 
 #[derive(Clone)]
 pub enum Material {

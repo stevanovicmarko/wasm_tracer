@@ -29,7 +29,7 @@ extern "C" {
     pub fn random() -> f32;
 
     #[wasm_bindgen(js_namespace = console, js_name = log)]
-    fn log(s: &str);
+    pub fn log(s: &str);
 
     type Crypto;
     static crypto: Crypto;
@@ -187,6 +187,6 @@ pub fn make_image(
 
 // test to see if wasm-bindgen works
 #[wasm_bindgen]
-pub fn greet(_name: &str) {
-    log(_name);
+pub fn greet(name: &str) {
+    log(name);
 }

@@ -115,13 +115,13 @@ impl Perlin {
                     let y_idx = ((j + dj) & 255) as usize;
                     let z_idx = ((k + dk) & 255) as usize;
 
-                    let rand_x = MY_PERLIN.random_x_direction[x_idx];
-                    let rand_y = MY_PERLIN.random_y_direction[y_idx];
-                    let rand_z = MY_PERLIN.random_z_direction[z_idx];
+                    let rand_x = PERLIN_STATIC_REF.random_x_direction[x_idx];
+                    let rand_y = PERLIN_STATIC_REF.random_y_direction[y_idx];
+                    let rand_z = PERLIN_STATIC_REF.random_z_direction[z_idx];
 
                     let index = (rand_x ^ rand_y ^ rand_z) as usize;
 
-                    c[di as usize][dj as usize][dk as usize] = MY_PERLIN.random_vecs[index];
+                    c[di as usize][dj as usize][dk as usize] = PERLIN_STATIC_REF.random_vecs[index];
                 }
             }
         }
@@ -149,7 +149,7 @@ impl Perlin {
 }
 
 lazy_static! {
-    static ref MY_PERLIN: Perlin = Perlin::new();
+    static ref PERLIN_STATIC_REF: Perlin = Perlin::new();
 }
 
 impl Texture {
@@ -176,7 +176,7 @@ impl Texture {
                     temp_p *= 2.0;
                 }
 
-                Point3::new(1.0, 1.0, 1.0) * 0.5 * (1.0 + f32::sin(MY_PERLIN.scale_factor * point.z + 10.0 * acc))
+                Point3::new(1.0, 1.0, 1.0) * 0.5 * (1.0 + f32::sin(PERLIN_STATIC_REF.scale_factor * point.z + 10.0 * acc))
             }
         }
     }

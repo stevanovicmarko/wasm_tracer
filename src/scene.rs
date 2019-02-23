@@ -28,9 +28,9 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
         ..add_object(Box::new(Sphere::new(
         Point3::new(0.0, 0.1, -1.0),
         0.6,
-        Material::Lambertian {
+        Material::DiffuseLight {
             texture: Texture::Constant{
-                color: Point3::new(0.99, 0.1, 0.01)
+                color: Point3::new(1.0, 1.0, 1.0)
                 }})));
     ..add_object(Box::new(Sphere::new(
         Point3::new(1.1, 0.0, -1.0),

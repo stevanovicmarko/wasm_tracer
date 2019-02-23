@@ -188,4 +188,5 @@ pub enum Material {
     Lambertian { texture: Texture },
     Metallic { r: f32, g: f32, b: f32 },
     Dielectric { refractive_index: f32 },
+    DiffuseLight { texture: Texture}
 }

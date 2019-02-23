@@ -49,15 +49,14 @@ fn make_random_array(len: usize) -> Vec<f32> {
 }
 
 lazy_static! {
-    static ref BACKGROUND_COLOR: Vector3<f32> = vec3(0.5, 0.7, 1.0);
-    static ref DARK_COLOR: Vector3<f32> = vec3(0.0, 0.0, 0.0);
+    static ref BACKGROUND_COLOR: Vector3<f32> = vec3(0.2, 0.2, 0.2);
 }
 
 fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f32> {
     let shade_record = world.trace(ray);
 
     let pixel_color: Vector3<f32> = match (shade_record, depth < 50) {
-        (_, false) => *DARK_COLOR,
+        (_, false) => *BACKGROUND_COLOR,
         (None, _) => {
             let unit_direction = ray.direction.normalize();
             let t = (unit_direction.y + 1.0) * 0.5;
@@ -124,6 +123,10 @@ fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f
                         Ray::new(rec.local_hit_point, refracted, 0.0)
                     };
                     generate_color_for_pixel(&bounced_ray, world, depth + 1)
+                }
+                DiffuseLight { texture } => {
+                    let Point3 { x: r, y: g, z: b } = texture.value(rec.local_hit_point.x, rec.local_hit_point.y, &rec.local_hit_point);
+                    vec3(r, g, b)
                 }
             };
             accumulated_color

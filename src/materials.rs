@@ -43,7 +43,7 @@ pub fn random_vec_in_unit_sphere() -> Vector3<f32> {
     random() * vec3(x, y, z)
 }
 
-#[derive(Clone)]
+
 pub enum Texture {
     Constant {
         color: Point3<f32>,
@@ -55,7 +55,7 @@ pub enum Texture {
     Noise,
 }
 
-#[derive(Clone)]
+
 pub struct Perlin {
     pub scale_factor: f32,
     pub random_vecs: [Vector3<f32>; 256],
@@ -176,13 +176,14 @@ impl Texture {
                     temp_p *= 2.0;
                 }
 
-                Point3::new(1.0, 1.0, 1.0) * 0.5 * (1.0 + f32::sin(PERLIN_STATIC_REF.scale_factor * point.z + 10.0 * acc))
+                Point3::new(1.0, 1.0, 1.0)
+                    * 0.5
+                    * (1.0 + f32::sin(PERLIN_STATIC_REF.scale_factor * point.z + 10.0 * acc))
             }
         }
     }
 }
 
-#[derive(Clone)]
 pub enum Material {
     Lambertian { texture: Texture },
     Metallic { r: f32, g: f32, b: f32 },

@@ -56,7 +56,7 @@ impl GeometricObject for Sphere {
                     intersect_parameter,
                     local_hit_point,
                     normal,
-                    material: self.material.clone(),
+                    material: &self.material,
                 })
             })
         } else {
@@ -128,7 +128,7 @@ impl GeometricObject for MovingSphere {
                     intersect_parameter,
                     local_hit_point,
                     normal,
-                    material: self.material.clone(),
+                    material: &self.material,
                 })
             })
         } else {

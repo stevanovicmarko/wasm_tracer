@@ -8,7 +8,7 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-wasm-bindgen = "0.2.33"
+wasm-bindgen = "0.2.37"
 cgmath = { version = "0.17.0", features = ["swizzle"] }
 cascade = "0.1.2"
 lazy_static ="1.2.0"
@@ -21,7 +21,7 @@ wbg-rand = "0.4.1"
 debug = false
 debug-assertions = false
 panic = "abort"
-lto = true
+# lto = true
 opt-level = 3 # optimize for performance
 # opt-level = 's' # optimize for size
 # opt-level = z

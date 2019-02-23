@@ -6,7 +6,7 @@ use std::{f32, u16, usize};
 use crate::{
     camera::Camera,
     geometric_objects::{MovingSphere, Sphere},
-    materials::{ Material, Texture },
+    materials::{Material, Texture},
     random,
     world::World,
 };
@@ -40,7 +40,7 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
     ..add_object(Box::new(Sphere::new(
         Point3::new(-0.95, 0.5, -1.0),
         0.45,
-        Material::Lambertian{ texture: Texture::Noise}
+        Material::Lambertian{ texture: Texture::Noise }
     )));
     ..add_object(Box::new(Sphere::new(
         Point3::new(-1.2, -0.2, -1.0),
@@ -64,7 +64,7 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
     ..add_object(Box::new(Sphere::new(
         Point3::new(-0.6, -0.30, 0.4),
         0.20,
-                Material::Metallic {
+          Material::Metallic {
             r: 0.8,
             g: 0.8,
             b: 0.8,
@@ -120,7 +120,7 @@ pub fn get_random_scene(
             radius,
             Material::Lambertian {
                 texture: Texture::Constant {
-                    color: Point3::new(random(), random(), random())
+                    color: Point3::new(random(), random(), random()),
                 },
             },
         )));

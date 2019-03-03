@@ -11,6 +11,7 @@ interface IComEvent extends Event {
     height: number;
     isRandomScene: boolean;
     numberOfSamples: number;
+    isJitteredSampling: boolean;
   };
 }
 
@@ -26,10 +27,17 @@ interface IComEvent extends Event {
       width,
       height,
       isRandomScene,
+      isJitteredSampling,
       numberOfSamples,
     } = (event as IComEvent).data;
 
-    const result = myMakeImage(width, height, numberOfSamples, isRandomScene);
+    const result = myMakeImage(
+      width,
+      height,
+      numberOfSamples,
+      isRandomScene,
+      isJitteredSampling
+    );
 
     postMessage(result);
   });

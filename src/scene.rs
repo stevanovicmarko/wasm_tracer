@@ -91,16 +91,16 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
               }
           }
     )));
-    ..add_object(Box::new(Rect::new(-10.0, 10.0, -10.0, 10.0, 0.91,
-          Material::Lambertian{
-              texture: Texture::Constant {
-                  color: Point3::new(0.1, 0.1, 0.1)
-              }
-          }
-    )));
+    // ..add_object(Box::new(Rect::new(-10.0, 10.0, -10.0, 10.0, 0.91,
+    //       Material::Lambertian{
+    //           texture: Texture::Constant {
+    //               color: Point3::new(0.1, 0.1, 0.1)
+    //           }
+    //       }
+    // )));
     };
 
-    let look_from = Point3::new(0.0, -0.3, 6.0);
+    let look_from = Point3::new(0.7, -0.25, 5.5);
     let look_at = Point3::new(0.0, 0.0, -1.0);
     let v_up = vec3(0.0, 1.0, 0.0);
     let dist_to_focus = (look_from - look_at).magnitude();

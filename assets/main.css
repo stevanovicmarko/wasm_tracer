@@ -25,18 +25,18 @@ body, html {
 }
 
 #renderSettings label {
-    display: block;
     margin-top: 5px;
 }
 
-#renderSettings div:nth-last-child(4) {
+#rays-settings {
+    display: flex;
+}
+
+input[type="number"] {
     display: inherit;
     flex-direction: row;
     align-content: flex-start;
     align-items: center;
-}
-
-#renderSettings div:nth-last-child(4) input {
     padding: auto 0;
     margin: auto 0;
 }
@@ -51,9 +51,13 @@ body, html {
     margin-top: 5px;
 }
 
-#scene-type > div {
-    margin: 4px;
+#scene-type > div, #sampling-type > div {
+    margin: 4px 0px;
     display: flex;
     flex-direction: row;
     align-items: baseline;
+}
+
+label {
+    
 }

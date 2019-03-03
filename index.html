@@ -28,12 +28,13 @@
                    placeholder="500" min="240" step="5" value="500"/>
         </div>
         <label for="raysPerPixel">Rays per pixel:</label>
-        <div>
+        <div id="rays-settings">
             <input type="range" id="raysPerPixel" name="raysPerPixel"
                    min="8" max="255" value="16" step="1"/>
             <span id="samplesLabel">16</span>
         </div>
 
+        <label for="scene-type">Scene type:</label>
         <div id="scene-type">
             <div>
                 <input type="radio" id="predefined-scene" name="scene-select" checked/>
@@ -44,10 +45,24 @@
                 <label for="random-scene">Random scene</label>
             </div>
         </div>
+        <label for="sampling-type">Sampling type:</label>
+        <div id="sampling-type">
+                <div>
+                    <input type="radio" id="jittered-sampling" name="sampler-select" checked/>
+                    <label for="random-scene">Jittered sampling</label>
+                </div>
+                <div>
+                    <input type="radio" id="uniform-sampling" name="sampler-select" />
+                    <label for="predefined-scene">Uniform sampling</label>
+                </div>
+            </div>
+            <div>
         <div>
             <button id="renderButton">Render</button>
         </div>
         <div>
+            <span id="renderTime"></span>
+        </div
             <span id="renderTime"></span>
         </div>
     </fieldset>

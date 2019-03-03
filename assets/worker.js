@@ -6,8 +6,8 @@ delete WebAssembly.instantiateStreaming;
     const myGreet = wasm_bindgen.greet;
     const myMakeImage = wasm_bindgen.make_image;
     self.addEventListener('message', event => {
-        const { width, height, isRandomScene, numberOfSamples, } = event.data;
-        const result = myMakeImage(width, height, numberOfSamples, isRandomScene);
+        const { width, height, isRandomScene, isJitteredSampling, numberOfSamples, } = event.data;
+        const result = myMakeImage(width, height, numberOfSamples, isRandomScene, isJitteredSampling);
         postMessage(result);
     });
     myGreet('wasm works');

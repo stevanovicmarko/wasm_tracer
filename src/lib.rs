@@ -48,19 +48,34 @@ fn make_random_array(len: usize) -> Vec<f32> {
         .collect::<Vec<_>>()
 }
 
-const BACKGROUND_COLOR: Vector3<f32> = vec3(0.2, 0.2, 0.2);
+fn jittered_samples(num_samples: u8) -> Vec<(f32, f32)> {
+    let n = f32::from(num_samples).sqrt() as usize;
+    let mut samples = Vec::new();
+    for j in 0..n {
+        for k in 0..n {
+            let sp = (
+                (k as f32 + (1.0 - 2.0 * random())) / n as f32,
+                (j as f32 + (1.0 - 2.0 * random())) / n as f32,
+            );
+            samples.push(sp);
+        }
+    }
+    samples
+}
 
+const BACKGROUND_COLOR: Vector3<f32> = vec3(0.01, 0.01, 0.01);
 
 fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f32> {
     let shade_record = world.trace(ray);
 
-    let pixel_color: Vector3<f32> = match (shade_record, depth < 100) {
+    let pixel_color: Vector3<f32> = match (shade_record, depth < 50) {
         (_, false) => BACKGROUND_COLOR,
         (None, _) => {
             // This code adds background ambiental fake light source.
-            let unit_direction = ray.direction.normalize();
-            let t = (unit_direction.y + 1.0) * 0.5;
-            vec3(1.0, 1.0, 1.0).lerp(BACKGROUND_COLOR, t)
+            // let unit_direction = ray.direction.normalize();
+            // let t = (unit_direction.y + 1.0) * 0.5;
+            // vec3(1.0, 1.0, 1.0).lerp(BACKGROUND_COLOR, t)
+            BACKGROUND_COLOR
         }
         // TODO: Figure out how to add time=0.0 as default param for ray class
         (Some(ref rec), true) => {
@@ -145,6 +160,7 @@ pub fn make_image(
     canvas_height: u16,
     num_samples: u8,
     random_scene: bool,
+    jittered_sampling: bool,
 ) -> Vec<u32> {
     let preallocate_capacity = usize::from(canvas_width) * usize::from(canvas_height);
 
@@ -159,17 +175,28 @@ pub fn make_image(
     let mut image = Vec::<u32>::with_capacity(preallocate_capacity);
 
     // generate precomputed displacements
-    let xs = make_random_array(usize::from(num_samples));
-    let ys = make_random_array(usize::from(num_samples));
+    // TODO: optimize samples generation
+    let samples = if jittered_sampling {
+        jittered_samples(num_samples)
+    } else {
+        let xs = make_random_array(usize::from(num_samples));
+        let ys = make_random_array(usize::from(num_samples));
+        let mut vals = Vec::new();
+        for i in 0..xs.len() {
+            vals.push((xs[i], ys[i]));
+        }
+        vals
+    };
 
     for i in 0..canvas_height {
         for j in 0..canvas_width {
             pixel_color.x = 0.0;
             pixel_color.y = 0.0;
             pixel_color.z = 0.0;
-            for k in 0..num_samples {
-                let dx = (f32::from(j) + xs[usize::from(k)]) / f32::from(canvas_width);
-                let dy = (f32::from(i) + ys[usize::from(k)]) / f32::from(canvas_height);
+
+            for k in 0..samples.len() {
+                let dx = (f32::from(j) + samples[k].0) / f32::from(canvas_width);
+                let dy = (f32::from(i) + samples[k].1) / f32::from(canvas_height);
 
                 let direction = camera.get_ray(dx, dy);
                 pixel_color += generate_color_for_pixel(&direction, &world, 0);

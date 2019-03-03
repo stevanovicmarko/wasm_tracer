@@ -7,9 +7,12 @@ const raysPerPixel = document.getElementById(
   'raysPerPixel'
 ) as HTMLInputElement;
 const samplesLabel = document.getElementById('samplesLabel') as HTMLSpanElement;
-const radioButtons = document.getElementsByName('scene-select') as NodeListOf<
-  HTMLInputElement
->;
+const sceneSelectButtons = document.getElementsByName(
+  'scene-select'
+) as NodeListOf<HTMLInputElement>;
+const samplingSelectButtons = document.getElementsByName(
+  'sampler-select'
+) as NodeListOf<HTMLInputElement>;
 const renderButton = document.getElementById(
   'renderButton'
 ) as HTMLButtonElement;
@@ -36,6 +39,7 @@ heightInput.addEventListener('change', event => {
 });
 
 let sceneType = 'predefined-scene';
+let samplingType = 'jittered-sampling';
 let width = canvas.width;
 let height = canvas.height;
 let numberOfSamples = parseInt(samplesLabel.innerText, 10);
@@ -49,9 +53,15 @@ renderButton.addEventListener('click', event => {
     return;
   }
 
-  radioButtons.forEach(radioButton => {
+  sceneSelectButtons.forEach(radioButton => {
     if (radioButton.checked) {
       sceneType = radioButton.id;
+    }
+  });
+
+  samplingSelectButtons.forEach(radioButton => {
+    if (radioButton.checked) {
+      samplingType = radioButton.id;
     }
   });
 
@@ -59,6 +69,7 @@ renderButton.addEventListener('click', event => {
   height = canvas.height;
   numberOfSamples = parseInt(samplesLabel.innerText, 10);
   const isRandomScene = sceneType !== 'predefined-scene';
+  const isJitteredSampling = samplingType === 'jittered-sampling';
 
   preventRenderRequests = true;
   renderSettings.style.pointerEvents = 'none';
@@ -73,6 +84,7 @@ renderButton.addEventListener('click', event => {
     height,
     numberOfSamples,
     isRandomScene,
+    isJitteredSampling,
   });
 });
 

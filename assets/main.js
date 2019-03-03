@@ -5,7 +5,8 @@ const widthInput = document.getElementById('canvasWidth');
 const heightInput = document.getElementById('canvasHeight');
 const raysPerPixel = document.getElementById('raysPerPixel');
 const samplesLabel = document.getElementById('samplesLabel');
-const radioButtons = document.getElementsByName('scene-select');
+const sceneSelectButtons = document.getElementsByName('scene-select');
+const samplingSelectButtons = document.getElementsByName('sampler-select');
 const renderButton = document.getElementById('renderButton');
 const renderTime = document.getElementById('renderTime');
 const canvas = document.getElementById('canvas');
@@ -24,6 +25,7 @@ heightInput.addEventListener('change', event => {
     canvas.height = parseInt(event.target.value, 10);
 });
 let sceneType = 'predefined-scene';
+let samplingType = 'jittered-sampling';
 let width = canvas.width;
 let height = canvas.height;
 let numberOfSamples = parseInt(samplesLabel.innerText, 10);
@@ -34,15 +36,21 @@ renderButton.addEventListener('click', event => {
     if (preventRenderRequests) {
         return;
     }
-    radioButtons.forEach(radioButton => {
+    sceneSelectButtons.forEach(radioButton => {
         if (radioButton.checked) {
             sceneType = radioButton.id;
+        }
+    });
+    samplingSelectButtons.forEach(radioButton => {
+        if (radioButton.checked) {
+            samplingType = radioButton.id;
         }
     });
     width = canvas.width;
     height = canvas.height;
     numberOfSamples = parseInt(samplesLabel.innerText, 10);
     const isRandomScene = sceneType !== 'predefined-scene';
+    const isJitteredSampling = samplingType === 'jittered-sampling';
     preventRenderRequests = true;
     renderSettings.style.pointerEvents = 'none';
     renderSettings.style.opacity = '0.2';
@@ -53,6 +61,7 @@ renderButton.addEventListener('click', event => {
         height,
         numberOfSamples,
         isRandomScene,
+        isJitteredSampling,
     });
 });
 worker.onmessage = ({ data }) => {

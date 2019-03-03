@@ -8,7 +8,7 @@ pub struct Ray {
 }
 
 impl Ray {
-    pub fn new(origin: Point3<f32>, direction: Vector3<f32>, time: f32) -> Self {
+    pub const fn new(origin: Point3<f32>, direction: Vector3<f32>, time: f32) -> Self {
         Ray {
             origin,
             direction,
@@ -16,6 +16,7 @@ impl Ray {
         }
     }
 
+    #[inline]
     pub fn point_at_parameter(&self, t: f32) -> Point3<f32> {
         self.origin + (self.direction * t)
     }

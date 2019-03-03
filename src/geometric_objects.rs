@@ -19,7 +19,7 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn new(center: Point3<f32>, radius: f32, material: Material) -> Self {
+    pub const fn new(center: Point3<f32>, radius: f32, material: Material) -> Self {
         Sphere {
             center,
             radius,
@@ -75,7 +75,7 @@ pub struct MovingSphere {
 }
 
 impl MovingSphere {
-    pub fn new(
+    pub const fn new(
         center_start: Point3<f32>,
         center_end: Point3<f32>,
         time_start: f32,
@@ -134,5 +134,41 @@ impl GeometricObject for MovingSphere {
         } else {
             None
         }
+    }
+}
+
+pub struct Rect {
+    x0: f32,
+    x1: f32,
+    z0: f32,
+    z1: f32,
+    y_height: f32,
+    material: Material,
+}
+
+impl Rect {
+pub const fn new(x0: f32, x1: f32, z0: f32, z1: f32, y_height: f32, material: Material) -> Self {
+        Self { x0, x1, z0, z1, y_height, material }
+    }
+}
+
+impl GeometricObject for Rect {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<ShadeRecord> {
+        let t = (self.y_height - ray.origin.y) / ray.direction.y;
+        if t < t_min || t > t_max {
+            return None;
+        }
+        let x = ray.origin.x + t * ray.direction.x;
+        let z = ray.origin.z + t * ray.direction.z;
+        if x < self.x0 || x > self.x1 || z < self.z0 || z > self.z1 {
+            return None;
+        }
+        let local_hit_point = ray.point_at_parameter(t);
+        Some(ShadeRecord{
+            intersect_parameter: t,
+            local_hit_point,
+            normal: Vector3::new(0.0, 0.0, 1.0),
+            material: &self.material,
+        })
     }
 }

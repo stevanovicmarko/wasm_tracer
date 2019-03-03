@@ -5,7 +5,7 @@ use std::{f32, u16, usize};
 
 use crate::{
     camera::Camera,
-    geometric_objects::{MovingSphere, Sphere},
+    geometric_objects::{MovingSphere, Sphere, Rect},
     materials::{Material, Texture},
     random,
     world::World,
@@ -28,9 +28,9 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
         ..add_object(Box::new(Sphere::new(
         Point3::new(0.0, 0.1, -1.0),
         0.6,
-        Material::DiffuseLight {
+        Material::Lambertian {
             texture: Texture::Constant{
-                color: Point3::new(1.0, 1.0, 1.0)
+                color: Point3::new(0.9, 0.1, 0.2)
                 }})));
     ..add_object(Box::new(Sphere::new(
         Point3::new(1.1, 0.0, -1.0),
@@ -70,9 +70,37 @@ pub fn get_predefined_scene(canvas_width: u16, canvas_height: u16) -> (Camera, W
             b: 0.8,
         },
     )));
+   ..add_object(Box::new(Rect::new(-1.7, -0.7, -0.5, 0.5, 0.9,
+          Material::DiffuseLight{
+              texture: Texture::Constant {
+                  color: Point3::new(1.0, 1.0, 1.0)
+              }
+          }
+    )));
+   ..add_object(Box::new(Rect::new(-0.5, 0.5, -0.5, 0.5, 0.9,
+          Material::DiffuseLight{
+              texture: Texture::Constant {
+                  color: Point3::new(1.0, 1.0, 1.0)
+              }
+          }
+    )));
+    ..add_object(Box::new(Rect::new(0.7, 1.7, -0.5, 0.5, 0.9,
+          Material::DiffuseLight{
+              texture: Texture::Constant {
+                  color: Point3::new(1.0, 1.0, 1.0)
+              }
+          }
+    )));
+    ..add_object(Box::new(Rect::new(-10.0, 10.0, -10.0, 10.0, 0.91,
+          Material::Lambertian{
+              texture: Texture::Constant {
+                  color: Point3::new(0.1, 0.1, 0.1)
+              }
+          }
+    )));
     };
 
-    let look_from = Point3::new(0.0, 0.3, 5.0);
+    let look_from = Point3::new(0.0, -0.3, 6.0);
     let look_at = Point3::new(0.0, 0.0, -1.0);
     let v_up = vec3(0.0, 1.0, 0.0);
     let dist_to_focus = (look_from - look_at).magnitude();

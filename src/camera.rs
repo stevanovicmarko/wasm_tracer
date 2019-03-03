@@ -68,10 +68,10 @@ impl Camera {
         }
     }
 
-    pub fn get_ray(&self, u: f32, v: f32) -> Ray {
+    pub fn get_ray(&self, u_coord: f32, v_coord: f32) -> Ray {
         let rd = random_vec_in_disc() * self.lens_radius;
         let offset = (self.u * rd.x) + (self.v * rd.y);
-        let (x, y, z) = ((self.horizontal * u) + (self.vertical * -v) - offset).into();
+        let (x, y, z) = ((self.horizontal * u_coord) + (self.vertical * - v_coord) - offset).into();
         let time = self.time_start + random() * (self.time_end - self.time_start);
         Ray::new(
             self.origin + offset,

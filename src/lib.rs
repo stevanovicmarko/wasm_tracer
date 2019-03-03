@@ -1,7 +1,7 @@
 #![warn(clippy::all)]
+#![warn(clippy::missing_const_for_fn)]
 use cgmath::prelude::*;
 use cgmath::{vec3, Point3, Vector3};
-use lazy_static::lazy_static;
 use std::{f32, mem, u16, usize};
 use wasm_bindgen::prelude::*;
 
@@ -48,19 +48,19 @@ fn make_random_array(len: usize) -> Vec<f32> {
         .collect::<Vec<_>>()
 }
 
-lazy_static! {
-    static ref BACKGROUND_COLOR: Vector3<f32> = vec3(0.2, 0.2, 0.2);
-}
+const BACKGROUND_COLOR: Vector3<f32> = vec3(0.2, 0.2, 0.2);
+
 
 fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f32> {
     let shade_record = world.trace(ray);
 
-    let pixel_color: Vector3<f32> = match (shade_record, depth < 50) {
-        (_, false) => *BACKGROUND_COLOR,
+    let pixel_color: Vector3<f32> = match (shade_record, depth < 100) {
+        (_, false) => BACKGROUND_COLOR,
         (None, _) => {
+            // This code adds background ambiental fake light source.
             let unit_direction = ray.direction.normalize();
             let t = (unit_direction.y + 1.0) * 0.5;
-            vec3(1.0, 1.0, 1.0).lerp(*BACKGROUND_COLOR, t)
+            vec3(1.0, 1.0, 1.0).lerp(BACKGROUND_COLOR, t)
         }
         // TODO: Figure out how to add time=0.0 as default param for ray class
         (Some(ref rec), true) => {
@@ -125,7 +125,11 @@ fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f
                     generate_color_for_pixel(&bounced_ray, world, depth + 1)
                 }
                 DiffuseLight { texture } => {
-                    let Point3 { x: r, y: g, z: b } = texture.value(rec.local_hit_point.x, rec.local_hit_point.y, &rec.local_hit_point);
+                    let Point3 { x: r, y: g, z: b } = texture.value(
+                        rec.local_hit_point.x,
+                        rec.local_hit_point.y,
+                        &rec.local_hit_point,
+                    );
                     vec3(r, g, b)
                 }
             };

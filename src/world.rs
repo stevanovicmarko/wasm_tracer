@@ -17,6 +17,7 @@ impl World {
         }
     }
 
+    #[inline]
     pub fn add_object(&mut self, object: Box<dyn GeometricObject>) {
         self.objects.push(object);
     }

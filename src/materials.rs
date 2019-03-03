@@ -7,10 +7,12 @@ use wbg_rand::{wasm_rng, Rng};
 
 use crate::random;
 
+#[inline]
 pub fn reflected_vector(v: &Vector3<f32>, n: &Vector3<f32>) -> Vector3<f32> {
     v - n * 2.0 * v.dot(*n)
 }
 
+#[inline]
 pub fn generate_reflect_probability(cosine: f32, refractive_index: f32) -> f32 {
     let mut r0 = (1.0 - refractive_index) / (1.0 + refractive_index);
     r0 = r0 * r0;
@@ -43,7 +45,6 @@ pub fn random_vec_in_unit_sphere() -> Vector3<f32> {
     random() * vec3(x, y, z)
 }
 
-
 pub enum Texture {
     Constant {
         color: Point3<f32>,
@@ -54,7 +55,6 @@ pub enum Texture {
     },
     Noise,
 }
-
 
 pub struct Perlin {
     pub scale_factor: f32,
@@ -188,5 +188,5 @@ pub enum Material {
     Lambertian { texture: Texture },
     Metallic { r: f32, g: f32, b: f32 },
     Dielectric { refractive_index: f32 },
-    DiffuseLight { texture: Texture}
+    DiffuseLight { texture: Texture },
 }

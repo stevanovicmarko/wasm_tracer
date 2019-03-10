@@ -68,14 +68,13 @@ const BACKGROUND_COLOR: Vector3<f32> = vec3(0.01, 0.01, 0.01);
 fn generate_color_for_pixel(ray: &Ray, world: &World, depth: usize) -> Vector3<f32> {
     let shade_record = world.trace(ray);
 
-    let pixel_color: Vector3<f32> = match (shade_record, depth < 50) {
+    let pixel_color: Vector3<f32> = match (shade_record, depth < 100) {
         (_, false) => BACKGROUND_COLOR,
         (None, _) => {
             // This code adds background ambiental fake light source.
-            // let unit_direction = ray.direction.normalize();
-            // let t = (unit_direction.y + 1.0) * 0.5;
-            // vec3(1.0, 1.0, 1.0).lerp(BACKGROUND_COLOR, t)
-            BACKGROUND_COLOR
+            let unit_direction = ray.direction.normalize();
+            let t = (unit_direction.y + 1.0) * 0.5;
+            vec3(0.1, 0.1, 0.1).lerp(BACKGROUND_COLOR, t)
         }
         // TODO: Figure out how to add time=0.0 as default param for ray class
         (Some(ref rec), true) => {
@@ -194,9 +193,9 @@ pub fn make_image(
             pixel_color.y = 0.0;
             pixel_color.z = 0.0;
 
-            for k in 0..samples.len() {
-                let dx = (f32::from(j) + samples[k].0) / f32::from(canvas_width);
-                let dy = (f32::from(i) + samples[k].1) / f32::from(canvas_height);
+            for sample in &samples {
+                let dx = (f32::from(j) + sample.0) / f32::from(canvas_width);
+                let dy = (f32::from(i) + sample.1) / f32::from(canvas_height);
 
                 let direction = camera.get_ray(dx, dy);
                 pixel_color += generate_color_for_pixel(&direction, &world, 0);

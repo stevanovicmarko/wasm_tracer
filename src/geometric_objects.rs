@@ -154,21 +154,22 @@ pub const fn new(x0: f32, x1: f32, z0: f32, z1: f32, y_height: f32, material: Ma
 
 impl GeometricObject for Rect {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<ShadeRecord> {
-        let t = (self.y_height - ray.origin.y) / ray.direction.y;
-        if t < t_min || t > t_max {
-            return None;
-        }
-        let x = ray.origin.x + t * ray.direction.x;
-        let z = ray.origin.z + t * ray.direction.z;
-        if x < self.x0 || x > self.x1 || z < self.z0 || z > self.z1 {
-            return None;
-        }
-        let local_hit_point = ray.point_at_parameter(t);
-        Some(ShadeRecord{
-            intersect_parameter: t,
-            local_hit_point,
-            normal: Vector3::new(0.0, 0.0, 1.0),
-            material: &self.material,
+        let intersect_param = match (self.y_height - ray.origin.y) / ray.direction.y {
+            t if t < t_min || t > t_max => None,
+            t => Some(t)
+        };
+
+        intersect_param.and_then(|t| {
+            match (ray.origin.x + t * ray.direction.x , ray.origin.z + t * ray.direction.z) {
+                (x, z)  if x < self.x0 || x > self.x1 || z < self.z0 || z > self.z1 => None,
+                _ =>  
+                    Some(ShadeRecord{
+                        intersect_parameter: t,
+                        local_hit_point: ray.point_at_parameter(t),
+                        normal: Vector3::new(0.0, 0.0, 1.0),
+                        material: &self.material,
+                    })
+            }
         })
     }
 }

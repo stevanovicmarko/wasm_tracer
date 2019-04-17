@@ -12,7 +12,7 @@ npm run serve
 
 Then navigate to localhost:8080 to run the raytracer by adjusting number of rays per pixel and clicking on the render button.
 
-Warning: it will take probably over a minute to render an image with0 more than 50 rays per pixel (look at render time on the screenshot above).
+Warning: it will take probably over a minute to render an image with more than 50 rays per pixel. Try using jittered sampling for better perfromance.
 
 To rebuild wasm tracer use rust nightly compiler and run:
 

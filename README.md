@@ -1,6 +1,8 @@
 # wasm-based raytracer
 
-![Screenshot](screenshot.png)
+![Screenshot](screenshot1.png)
+
+![Screenshot](screenshot2.png)
 
 A simple raytracer written in the rust programming language. Relies on web assembly and web workers support in the browser.
 To run do:

@@ -14,15 +14,15 @@
     "clean": "rimraf assets/*.js assets/*.wasm assets/*.d.ts assets/*.map target/wasm32-unknown-unknown/"
   },
   "devDependencies": {
-    "concurrently": "^4.1.0",
-    "copyfiles": "^2.1.0",
-    "prettier": "^1.16.4",
-    "rimraf": "^2.6.3",
-    "tslint": "^5.13.1",
+    "concurrently": "^5.3.0",
+    "copyfiles": "^2.3.0",
+    "prettier": "^2.0.5",
+    "rimraf": "^3.0.2",
+    "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.3.3333",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.2.3",
-    "webpack-dev-server": "^3.2.1"
+    "typescript": "^3.9.7",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
   }
 }
